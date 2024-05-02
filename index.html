@@ -265,43 +265,59 @@
                     break;
                 case 81: // Q Rotate top
                 case 113: // q
-                    topNegativeRotation = false;
-                    topPositiveRotation = !topPositiveRotation;
+                    if (lock_movement == false){
+                        topNegativeRotation = false;
+                        topPositiveRotation = !topPositiveRotation;
+                    }
                     break;
-                case 65: // A key (toggle wireframe)
+                case 65: // A key
                 case 97: // a key
-                    topPositiveRotation = false;
-                    topNegativeRotation = !topNegativeRotation;
+                    if (lock_movement == false){
+                        topPositiveRotation = false;
+                        topNegativeRotation = !topNegativeRotation;
+                    }
                     break;
-                case 87: // W Rotate top
+                case 87: // W 
                 case 119: // w
-                    NegativeCarrinhoMoviment = false;
-                    PositiveCarrinhoMoviment = !PositiveCarrinhoMoviment;
+                    if (lock_movement == false){
+                        NegativeCarrinhoMoviment = false;
+                        PositiveCarrinhoMoviment = !PositiveCarrinhoMoviment;
+                    }
                     break;
-                case 83: // S key (toggle wireframe)
+                case 83: // S key 
                 case 115: // s key
-                    PositiveCarrinhoMoviment = false;
-                    NegativeCarrinhoMoviment = !NegativeCarrinhoMoviment;
+                    if (lock_movement == false){
+                        PositiveCarrinhoMoviment = false;
+                        NegativeCarrinhoMoviment = !NegativeCarrinhoMoviment;
+                    }
                     break;
-                case 69: // E Rotate top
+                case 69: // E 
                 case 101: // e
-                    NegativeGarraLift = false;
-                    PositiveGarraLift = !PositiveGarraLift;
+                    if (lock_movement == false){
+                        NegativeGarraLift = false;
+                        PositiveGarraLift = !PositiveGarraLift;
+                    }
                     break;
-                case 68: // D key (toggle wireframe)
+                case 68: // D key
                 case 100: // d key
-                    PositiveGarraLift = false;
-                    NegativeGarraLift = !NegativeGarraLift;
+                    if (lock_movement == false){
+                        PositiveGarraLift = false;
+                        NegativeGarraLift = !NegativeGarraLift;
+                    }
                     break;
                 case 82: // R
                 case 114: // r
-                    NegativeGarraOpen = false;
-                    PositiveGarraOpen = !PositiveGarraOpen;
+                    if (lock_movement == false){
+                        NegativeGarraOpen = false;
+                        PositiveGarraOpen = !PositiveGarraOpen;
+                    }
                     break;
                 case 70: // F
                 case 102: // f
-                    PositiveGarraOpen = false;
-                    NegativeGarraOpen = !NegativeGarraOpen;
+                    if (lock_movement == false){
+                        PositiveGarraOpen = false;
+                        NegativeGarraOpen = !NegativeGarraOpen;
+                    }
                     break;
 
                 case 55: //7
@@ -598,6 +614,7 @@
 
         var Test_moviment = false;
 
+        var close_claw = false;
         var moveCargo = false;
         var place_cargo = false;
         var go_back = false;
@@ -609,10 +626,11 @@
 
         var collided_cargo
 
+        var lock_movement = false;
+
         var cargo_aux = 0;
 
         function animate() {
-
             if (topPositiveRotation){
                 SuperiorGroup.rotation.y += 0.005;
             }
@@ -679,7 +697,7 @@
                 }
                 
             }
-            
+        
             if (Test_moviment){
                 if (SuperiorGroup.rotation.y<0.785){
                     topPositiveRotation = true
@@ -732,6 +750,7 @@
                     continue_way_back = false;
                     NegativeGarraOpen = false;
                     back_to_origin = false;
+                    lock_movement = false;
                 } 
 
 
@@ -751,7 +770,7 @@
             if (release_cargo){
                 moveCargo = false;
                 cargo_aux = 0;
-                place_cargo = false;
+                //place_cargo = false;
                 if (Dedo_1.rotation.x < 0){
                     back_to_origin = true;
                     release_cargo = false;
@@ -766,17 +785,27 @@
 
 
             if (checkCollision()) {
+                lock_movement = true;
                 topPositiveRotation = false;
                 NegativeCarrinhoMoviment = false;
                 NegativeGarraLift = false;
                 Test_moviment = false;
                 moveCargo = true;
-                PositiveGarraOpen = true;
                 place_cargo = true;
-                lift_cargo = true;
+                close_claw = true;
+                
             }
 
             if (place_cargo){
+
+                if (close_claw){
+                    PositiveGarraOpen = true;
+                    if (Dedo_1.rotation.x > 0.51){
+                        lift_cargo = true;
+                        close_claw = false;
+                    }
+
+                }
 
                 if (lift_cargo){
                     if (Garra.position.y<-4){
@@ -786,6 +815,7 @@
                         lift_cargo = false;
                         rotate_cargo = true;
                     }
+
                 }
 
                 if (rotate_cargo){
@@ -825,7 +855,7 @@
                 }
 
                 if(lower_claw){
-                    if (Garra.position.y>-6.85){
+                    if (Garra.position.y>-6.80){
                             NegativeGarraLift = true;
                     }else{
                             NegativeGarraLift = false;
@@ -833,6 +863,7 @@
                             PositiveGarraOpen = false;
                             NegativeGarraOpen = true;
                             release_cargo = true;
+                            place_cargo = false;
                      }
                 }
 
