@@ -38,13 +38,14 @@
         var collider_carga1, collider_carga2, collider_carga3;
         var collider_Garra;
         var Carga1, Carga2, Carga3;
-        var blocoGancho
+        var blocoGancho;
+        var meshes = [];
 
         function updateHUD() {
             var keysMap = {
-                "49": "1", "50": "2", "51": "3", "52": "4", "53": "5", "54": "6", // Number keys
+                "49": "1", "50": "2", "51": "3", "52": "4", "53": "5", "54": "6", "55": "7", // Number keys
                 "81": "Q", "65": "A", "87": "W", "83": "S", "69": "E", "68": "D", // QWERTY keys
-                "82": "R", "70": "F", "75": "K", "90": "Z" // Additional keys
+                "82": "R", "70": "F", "90": "Z" // Additional keys
             };
 
             var hudContent = "Active Keys: ";
@@ -297,8 +298,7 @@
                     NegativeGarraOpen = !NegativeGarraOpen;
                     break;
 
-                case 75: //K
-                case 107: //k
+                case 55: //7
                     scene.traverse(function (node){
                         if(node instanceof THREE.Mesh){
                             node.material.wireframe = !node.material.wireframe;
@@ -306,7 +306,7 @@
                     });
                     break;
 
-                case 55: //7
+                case 56: //8
                     Test_moviment = true;
                     break;
                 case 48: //0
