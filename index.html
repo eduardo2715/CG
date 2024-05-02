@@ -40,6 +40,8 @@
         var Carga1, Carga2, Carga3;
         var blocoGancho;
         var meshes = [];
+        var mesheColours = [];
+        var materialstate = true;
 
         function updateHUD() {
             var keysMap = {
@@ -59,17 +61,19 @@
             document.getElementById('hud').innerHTML = hudContent;
         }
 
-        function createBlock(width, height, length, x, y, z){
+        function createBlock(width, height, length, x, y, z, colour){
             var geometry = new THREE.BoxGeometry(width, height, length);
-            material = new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true});
+            material = new THREE.MeshBasicMaterial({color: colour, wireframe: true});
             var mesh = new THREE.Mesh(geometry, material);
             mesh.position.set(x, y, z);
             scene.add(mesh);
+            meshes.push(mesh);
+            mesheColours.push(colour);
 
             return mesh;
         }
 
-        function createTetrahedron(width, height, length, x, y, z) {
+        function createTetrahedron(width, height, length, x, y, z, colour) {
             var aux = 1
             const verticesOfPyramid = [
                 -aux, 0, -aux,   // Vertex 0 (bottom-left-back)
@@ -89,7 +93,7 @@
 
             const geometry = new THREE.PolyhedronGeometry(verticesOfPyramid, indicesOfFaces, 1, 0);
 
-            var material = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide, wireframe: true }); // Red color for example
+            var material = new THREE.MeshBasicMaterial({ color: colour, side: THREE.DoubleSide, wireframe: true }); // Red color for example
 
             // Create a mesh using the geometry and material
             var pyramid = new THREE.Mesh(geometry, material);
@@ -100,6 +104,8 @@
 
             // Add the pyramid to the scene
             scene.add(pyramid);
+            meshes.push(pyramid);
+            mesheColours.push(colour);
 
             return pyramid;
         }
@@ -299,11 +305,15 @@
                     break;
 
                 case 55: //7
-                    scene.traverse(function (node){
-                        if(node instanceof THREE.Mesh){
-                            node.material.wireframe = !node.material.wireframe;
-                        }
+
+                    materialstate = !materialstate
+                    meshes.forEach((mesh, index) => {
+                     const color = mesheColours[index % mesheColours.length];
+                      const material = new THREE.MeshBasicMaterial({color: color, side: THREE.DoubleSide, wireframe: materialstate});
+                      mesh.material = material;
                     });
+
+                    console.log("Material State before toggle:", materialstate);
                     break;
 
                 case 56: //8
@@ -363,19 +373,19 @@
 
             scene.background = new THREE.Color(0xA3A3A3)
 
-            createBlock(3, 1 , 3, 0, 0.5, 0); //Base
-            createBlock(1, 7.5, 1, 0, 7.5/2+1/2 + 0.5, 0); //Torre
+            createBlock(3, 1 , 3, 0, 0.5, 0, 0x674EA7); //Base
+            createBlock(1, 7.5, 1, 0, 7.5/2+1/2 + 0.5, 0, 0xEEC23C); //Torre
 
             SuperiorGroup = new THREE.Group();
             SuperiorGroup.position.set(0, 0, 0); // Set group position
 
             // Create objects
-            var torreCima = createBlock(1, 1.5, 1, 0, 7.5+1/2+1.5/2 + 0.5, 0); // Cima Torre
-            var cabine = createBlock(2, 1, 1, 0, 7.5+1 + 0.5, 0.5); // Cabine
-            var lanca = createBlock(1, 1, 12, 0, 7.5+1+1.5 + 0.5, 2.5 ); // Lança + contra lança
-            var contrapeso = createBlock(1, 0.5, 1.5, 0, 7.5+1+1.5-0.75 + 0.5 ,-2.25); // Contra-peso
-            var carrinho = createBlock(0.5, 0.25, 0.5, 0, 7.5+1+1.5-0.625 + 0.5, 7.75); // Carrinho
-            var portaLanca = createTetrahedron(1, 2, 1, 0, 7.5+1+1.5+0.5 + 0.5, 0); // Porta lança
+            var torreCima = createBlock(1, 1.5, 1, 0, 7.5+1/2+1.5/2 + 0.5, 0, 0xEEC23C); // Cima Torre
+            var cabine = createBlock(2, 1, 1, 0, 7.5+1 + 0.5, 0.5, 0x174B7A); // Cabine
+            var lanca = createBlock(1, 1, 12, 0, 7.5+1+1.5 + 0.5, 2.5, 0xEEC23C ); // Lança + contra lança
+            var contrapeso = createBlock(1, 0.5, 1.5, 0, 7.5+1+1.5-0.75 + 0.5 ,-2.25, 0x444444); // Contra-peso
+            var carrinho = createBlock(0.5, 0.25, 0.5, 0, 7.5+1+1.5-0.625 + 0.5, 7.75, 0x444444); // Carrinho
+            var portaLanca = createTetrahedron(1, 2, 1, 0, 7.5+1+1.5+0.5 + 0.5, 0, 0xEEC23C); // Porta lança
             var caboAco = createLine(2.25, 0, 0, 7.5+1+1.5-0.625-0.25/2 + 0.5, 7.75); // Cabo de aço
 
             // Add objects to SuperiorGroup
@@ -390,7 +400,7 @@
             var aux = 7.5+1+1.5-0.625-0.25/2 + 0.5
 
 
-            blocoGancho = createBlock(0.3, 0.2, 0.3, 0, aux - 2.3, 7.75); //bloco do gancho
+            blocoGancho = createBlock(0.3, 0.2, 0.3, 0, aux - 2.3, 7.75, 0x000000); //bloco do gancho
 
 
             Dedo_1 = new THREE.Group();
@@ -399,11 +409,11 @@
             var parte1, parte2;
 
             // Calculate positions relative to Dedo_1 group's position
-            parte1 = createBlock(0.05, 0.05, 0.1, 0, 0, 0); //parte1 Dedo 1
+            parte1 = createBlock(0.05, 0.05, 0.1, 0, 0, 0, 0x604801); //parte1 Dedo 1
             parte1.position.set(0, 0, 0); // Set position relative to group
             Dedo_1.add(parte1);
 
-            parte2 = createBlock(0.05, 0.15, 0.05, 0, -0.10, 0); //parte2 Dedo 1
+            parte2 = createBlock(0.05, 0.15, 0.05, 0, -0.10, 0, 0x604801); //parte2 Dedo 1
             parte2.position.set(0, -0.10, 0.025); // Set position relative to group
             Dedo_1.add(parte2);
 
@@ -416,11 +426,11 @@
             Dedo_2.position.set( 0, aux - 2.3-0.05, 8 - 0.5); // Set group position
 
             // Calculate positions relative to Dedo_1 group's position
-            parte1 = createBlock(0.05, 0.05, 0.1, 0, 0, 0); //parte1 Dedo 2
+            parte1 = createBlock(0.05, 0.05, 0.1, 0, 0, 0, 0x604801); //parte1 Dedo 2
             parte1.position.set(0, 0, 0); // Set position relative to group
             Dedo_2.add(parte1);
 
-            parte2 = createBlock(0.05, 0.15, 0.05, 0, -0.10, 0); //parte2 Dedo 2
+            parte2 = createBlock(0.05, 0.15, 0.05, 0, -0.10, 0, 0x604801); //parte2 Dedo 2
             parte2.position.set(0, -0.10, -0.025); // Set position relative to group
             Dedo_2.add(parte2);
             Dedo_2.scale.set(2,2,2);
@@ -431,11 +441,11 @@
             Dedo_3.position.set( 0 + 0.25, aux - 2.3-0.05, 7.75); // Set group position
 
             // Calculate positions relative to Dedo_1 group's position
-            parte1 = createBlock(0.1, 0.05, 0.05, 0, 0, 0); //parte1 Dedo 2
+            parte1 = createBlock(0.1, 0.05, 0.05, 0, 0, 0, 0x604801); //parte1 Dedo 2
             parte1.position.set(0, 0, 0); // Set position relative to group
             Dedo_3.add(parte1);
 
-            parte2 = createBlock(0.05, 0.15, 0.05, 0, -0.10, 0); //parte2 Dedo 2
+            parte2 = createBlock(0.05, 0.15, 0.05, 0, -0.10, 0, 0x604801); //parte2 Dedo 2
             parte2.position.set(0.025, -0.1, 0); // Set position relative to group
             Dedo_3.add(parte2);
 
@@ -450,11 +460,11 @@
             Dedo_4.position.set( 0 - 0.25, aux - 2.3-0.05, 7.75); // Set group position
 
             // Calculate positions relative to Dedo_1 group's position
-            parte1 = createBlock(0.1, 0.05, 0.05, 0, 0, 0); //parte1 Dedo 2
+            parte1 = createBlock(0.1, 0.05, 0.05, 0, 0, 0, 0x604801); //parte1 Dedo 2
             parte1.position.set(0, 0, 0); // Set position relative to group
             Dedo_4.add(parte1);
 
-            parte2 = createBlock(0.05, 0.15, 0.05, 0, -0.10, 0); //parte2 Dedo 2
+            parte2 = createBlock(0.05, 0.15, 0.05, 0, -0.10, 0, 0x604801); //parte2 Dedo 2
             parte2.position.set(-0.025, -0.1, 0); // Set position relative to group
             Dedo_4.add(parte2);
             Dedo_4.scale.set(2,2,2);
@@ -472,26 +482,27 @@
 
             //CONTENTOR
 
-            createBlock(1.2, 0.2, 2.2, 4 + 0.1,0.1,6) //base contentor
-            createBlock(0.2, 1, 2, 3.6, 0.4 + 0.3, 6.1) //parede 1
-            createBlock(0.2, 1, 2, 4.6, 0.4 + 0.3, 5.9) //parede 2
-            createBlock(1, 1, 0.2, 4, 0.4 + 0.3, 5) //parede 3
-            createBlock(1, 1, 0.2, 4.2, 0.4 + 0.3, 7) //parede 4
+            createBlock(1.2, 0.2, 2.2, 4 + 0.1,0.1,6, 0x801616) //base contentor
+            createBlock(0.2, 1, 2, 3.6, 0.4 + 0.3, 6.1, 0x801616) //parede 1
+            createBlock(0.2, 1, 2, 4.6, 0.4 + 0.3, 5.9, 0x801616) //parede 2
+            createBlock(1, 1, 0.2, 4, 0.4 + 0.3, 5, 0x801616) //parede 3
+            createBlock(1, 1, 0.2, 4.2, 0.4 + 0.3, 7, 0x801616) //parede 4
 
             //CARGA
             var carga1, carga2
 
-            carga1 = createBlock(0.25, 0.25, 0.25, 0,0,0);
-            //carga2 = createBlock(0.25, 0.25, 0.25, 0,0,0);
+            carga1 = createBlock(0.25, 0.25, 0.25, 0,0,0, 0x00FF00);
 
             geometry = new THREE.TetrahedronGeometry(0.15, 2);
             // Define the material
             material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
             // Create the tetrahedron mesh
             var carga2 = new THREE.Mesh(geometry, material);
+            meshes.push(carga2);
+            mesheColours.push(0xff0000);
 
 
-            carga3 = createTetrahedron(0.25, 0.25, 0.25, 0,0,0); // Porta lança
+            carga3 = createTetrahedron(0.25, 0.25, 0.25, 0,0,0, 0xFF0000); // Porta lança
 
 
 
