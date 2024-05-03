@@ -45,9 +45,9 @@
 
         function updateHUD() {
             var keysMap = {
-                "49": "1", "50": "2", "51": "3", "52": "4", "53": "5", "54": "6", "55": "7", // Number keys
+                "48" : "0", "49": "1", "50": "2", "51": "3", "52": "4", "53": "5", "54": "6", "55": "7", "56" : "8" , // Number keys
                 "81": "Q", "65": "A", "87": "W", "83": "S", "69": "E", "68": "D", // QWERTY keys
-                "82": "R", "70": "F", "90": "Z" // Additional keys
+                "82": "R", "70": "F"// Additional keys
             };
 
             var hudContent = "Active Keys: ";
@@ -418,7 +418,7 @@
         function createScene(){
             scene = new THREE.Scene();
 
-            scene.background = new THREE.Color(0xFFCCFF)
+            scene.background = new THREE.Color(0xFFECFF)
 
             createBlock(3, 1 , 3, 0, 0.5, 0, 0x674EA7); //Base
             createBlock(1, 7.5, 1, 0, 7.5/2+1/2 + 0.5, 0, 0xEEC23C); //Torre
