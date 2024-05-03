@@ -9,7 +9,7 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            background-color: rgba(255, 255, 255, 0.5);
+            background-color: rgba(85, 136, 219, 0.5);
             padding: 10px;
         }
         .active-key {
@@ -69,6 +69,10 @@
             scene.add(mesh);
             meshes.push(mesh);
             mesheColours.push(colour);
+            const edges = new THREE.EdgesGeometry(geometry);
+            const segments = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({color : 0x000000}));
+            mesh.add(segments);
+
 
             return mesh;
         }
@@ -106,21 +110,24 @@
             scene.add(pyramid);
             meshes.push(pyramid);
             mesheColours.push(colour);
+            const edging = new THREE.EdgesGeometry(geometry);
+            const segmenting = new THREE.LineSegments(edging, new THREE.LineBasicMaterial({color : 0x000000}));
+            pyramid.add(segmenting);
 
             return pyramid;
         }
 
-        function createLine(height, length, x, y, z) {
+        function createMovingLine(height, length, x, y, z) {
             // Define the geometry for the line
             var geometry = new THREE.BufferGeometry();
             var vertices = [
                 0, 0, length,  // Start point
-                0, -height, 0   // End point   
+                0, -height, 0   // End point
             ];
             geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
 
             // Define the material for the line
-            material = new THREE.LineBasicMaterial({ color: 0x00ffff }); // Green color for example
+            material = new THREE.LineBasicMaterial({ color: 0x003333 }); // Green color for example
 
             // Create the line
             line_crane = new THREE.Line(geometry, material);
@@ -132,6 +139,30 @@
             scene.add(line_crane);
 
             return line_crane;
+        }
+
+        function createLine(height, length, width, x, y, z) {
+            // Define the geometry for the line
+            var geometry = new THREE.BufferGeometry();
+            var vertices = [
+                0, 0, -length,  // Start point
+                width, -height, 0   // End point
+            ];
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+
+            // Define the material for the line
+            material = new THREE.LineBasicMaterial({ color: 0xCC6600 }); // Green color for example
+
+            // Create the line
+            var line = new THREE.Line(geometry, material);
+
+            // Optionally, set the line's position, rotation, or scale
+            line.position.set(x, y, z);
+
+            // Add the line to the scene
+            scene.add(line);
+
+            return line;
         }
 
         function createCameras(){
@@ -387,7 +418,7 @@
         function createScene(){
             scene = new THREE.Scene();
 
-            scene.background = new THREE.Color(0xA3A3A3)
+            scene.background = new THREE.Color(0xFFCCFF)
 
             createBlock(3, 1 , 3, 0, 0.5, 0, 0x674EA7); //Base
             createBlock(1, 7.5, 1, 0, 7.5/2+1/2 + 0.5, 0, 0xEEC23C); //Torre
@@ -395,18 +426,20 @@
             SuperiorGroup = new THREE.Group();
             SuperiorGroup.position.set(0, 0, 0); // Set group position
 
-            // Create objects
+        // Create objects
             var torreCima = createBlock(1, 1.5, 1, 0, 7.5+1/2+1.5/2 + 0.5, 0, 0xEEC23C); // Cima Torre
             var cabine = createBlock(2, 1, 1, 0, 7.5+1 + 0.5, 0.5, 0x174B7A); // Cabine
             var lanca = createBlock(1, 1, 12, 0, 7.5+1+1.5 + 0.5, 2.5, 0xEEC23C ); // Lança + contra lança
             var contrapeso = createBlock(1, 0.5, 1.5, 0, 7.5+1+1.5-0.75 + 0.5 ,-2.25, 0x444444); // Contra-peso
             var carrinho = createBlock(0.5, 0.25, 0.5, 0, 7.5+1+1.5-0.625 + 0.5, 7.75, 0x444444); // Carrinho
             var portaLanca = createTetrahedron(1, 2, 1, 0, 7.5+1+1.5+0.5 + 0.5, 0, 0xEEC23C); // Porta lança
-            var caboAco = createLine(2.25, 0, 0, 7.5+1+1.5-0.625-0.25/2 + 0.5, 7.75); // Cabo de aço
+            var caboAco = createMovingLine(2.25, 0, 0, 7.5+1+1.5-0.625-0.25/2 + 0.5, 7.75); // Cabo de aço
+            var tirante_1 = createLine(2, 5, 0, 0, 7.5+1+1.5+3, 5); // tirante sobre a lança
+            var tirante_2 = createLine(2, -2.5, 0.5, 0, 7.5+1+1.5+3, -2.5); // tirante sobre a contralança (direita)
+            var tirante_3 = createLine(2, -2.5, -0.5, 0, 7.5+1+1.5+3, -2.5); // tirante sobre a lança (esquerda)
 
             // Add objects to SuperiorGroup
-            SuperiorGroup.add(torreCima, cabine, lanca, contrapeso, portaLanca);
-
+            SuperiorGroup.add(torreCima, cabine, lanca, contrapeso, portaLanca, tirante_1, tirante_2, tirante_3);
             // Create a group for carrinho and caboAco
             carrinhoAndCaboGroup = new THREE.Group();
             carrinhoAndCaboGroup.add(carrinho, caboAco);
@@ -511,11 +544,15 @@
 
             geometry = new THREE.TetrahedronGeometry(0.15, 2);
             // Define the material
-            material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+            material = new THREE.MeshBasicMaterial({ color: 0xffF000, wireframe: true });
             // Create the tetrahedron mesh
             var carga2 = new THREE.Mesh(geometry, material);
+            const edging = new THREE.EdgesGeometry(geometry);
+            const segmenting = new THREE.LineSegments(edging, new THREE.LineBasicMaterial({color : 0x000000}));
+            carga2.add(segmenting);
             meshes.push(carga2);
-            mesheColours.push(0xff0000);
+            mesheColours.push(0xfff000);
+            
 
 
             carga3 = createTetrahedron(0.25, 0.25, 0.25, 0,0,0, 0xFF0000); // Porta lança
