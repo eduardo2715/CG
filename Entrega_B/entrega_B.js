@@ -524,13 +524,13 @@ function createScene(){
     carga1 = createBlock(0.25, 0.25, 0.25, 0,0,0, 0x00FF00);
 
     var geometry = new THREE.DodecahedronGeometry( 0.15 );
-    material = new THREE.MeshBasicMaterial({ color: 0xffF000, wireframe: true });
+    material = new THREE.MeshBasicMaterial({ color: 0xFF3333, wireframe: true });
     var carga2 = new THREE.Mesh(geometry, material);
     var edging = new THREE.EdgesGeometry(geometry);
     var segmenting = new THREE.LineSegments(edging, new THREE.LineBasicMaterial({color : 0x000000}));
     carga2.add(segmenting);
     meshes.push(carga2);
-    mesheColours.push(0xfff000);
+    mesheColours.push(0xFF3333);
 
 
     var geometry = new THREE.IcosahedronGeometry( 0.15 );
@@ -544,23 +544,23 @@ function createScene(){
 
 
     var geometry = new THREE.TorusGeometry(0.15, 0.075, 30, 30 );
-    material = new THREE.MeshBasicMaterial({ color: 0xFF0000, wireframe: true });
+    material = new THREE.MeshBasicMaterial({ color: 0xFF33FF, wireframe: true });
     var carga4 = new THREE.Mesh(geometry, material);
     var edging = new THREE.EdgesGeometry(geometry);
     var segmenting = new THREE.LineSegments(edging, new THREE.LineBasicMaterial({color : 0x000000}));
     carga4.add(segmenting);
     meshes.push(carga4);
-    mesheColours.push(0xfff000);
+    mesheColours.push(0xFF33FF);
 
 
     var geometry = new THREE.TorusKnotGeometry(0.30, 0.12, 32, 30, 2, 3 );
-    material = new THREE.MeshBasicMaterial({ color: 0xFF0000, wireframe: true });
+    material = new THREE.MeshBasicMaterial({ color: 0x00FFFF, wireframe: true });
     var carga5 = new THREE.Mesh(geometry, material);
     var edging = new THREE.EdgesGeometry(geometry);
     var segmenting = new THREE.LineSegments(edging, new THREE.LineBasicMaterial({color : 0x000000}));
     carga5.add(segmenting);
     meshes.push(carga5);
-    mesheColours.push(0xfff000);
+    mesheColours.push(0x00FFFF);
 
 
     //COLISAO
