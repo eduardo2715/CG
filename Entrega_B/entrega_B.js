@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { ConstNode } from 'three/examples/jsm/nodes/Nodes.js';
 
 var scene, cameraTop, cameraFront, renderer, material;
 var topPositiveRotation = false, topNegativeRotation = false;
@@ -12,9 +13,9 @@ var carrinhoAndCaboGroup;
 var Garra;
 var SuperiorGroup;
 var activeKeys = {};
-var collider_carga1, collider_carga2, collider_carga3;
+var collider_carga1, collider_carga2, collider_carga3, collider_carga4, collider_carga5;
 var collider_Garra;
-var Carga1, Carga2, Carga3;
+var Carga1, Carga2, Carga3, Carga4, Carga5;
 var blocoGancho;
 var meshes = [];
 var mesheColours = [];
@@ -98,10 +99,12 @@ function createTetrahedron(width, height, length, x, y, z, colour) {
 function createMovingLine(height, length, x, y, z) {
     // Define the geometry for the line
     var geometry = new THREE.BufferGeometry();
+    
     var vertices = [
         0, 0, length,  // Start point
         0, -height, 0   // End point
     ];
+
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
 
     // Define the material for the line
@@ -139,6 +142,7 @@ function createLine(height, length, width, x, y, z) {
 
     // Add the line to the scene
     scene.add(line);
+
 
     return line;
 }
@@ -506,7 +510,6 @@ function createScene(){
     scene.add(SuperiorGroup);
 
 
-
     //CONTENTOR
 
     createBlock(1.2, 0.2, 2.2, 4 + 0.1,0.1,6, 0x801616) //base contentor
@@ -516,30 +519,53 @@ function createScene(){
     createBlock(1, 1, 0.2, 4.2, 0.4 + 0.3, 7, 0x801616) //parede 4
 
     //CARGA
-    var carga1, carga2, carga3;
+    var carga1, carga2, carga3, carga4, carga5;
 
     carga1 = createBlock(0.25, 0.25, 0.25, 0,0,0, 0x00FF00);
 
-    var geometry = new THREE.TetrahedronGeometry(0.15, 2);
-    // Define the material
+    var geometry = new THREE.DodecahedronGeometry( 0.15 );
     material = new THREE.MeshBasicMaterial({ color: 0xffF000, wireframe: true });
-    // Create the tetrahedron mesh
     var carga2 = new THREE.Mesh(geometry, material);
-    const edging = new THREE.EdgesGeometry(geometry);
-    const segmenting = new THREE.LineSegments(edging, new THREE.LineBasicMaterial({color : 0x000000}));
+    var edging = new THREE.EdgesGeometry(geometry);
+    var segmenting = new THREE.LineSegments(edging, new THREE.LineBasicMaterial({color : 0x000000}));
     carga2.add(segmenting);
     meshes.push(carga2);
     mesheColours.push(0xfff000);
-    
 
 
-    carga3 = createTetrahedron(0.25, 0.25, 0.25, 0,0,0, 0xFF0000); // Porta lança
+    var geometry = new THREE.IcosahedronGeometry( 0.15 );
+    material = new THREE.MeshBasicMaterial({ color: 0xFF0000, wireframe: true });
+    var carga3 = new THREE.Mesh(geometry, material);
+    var edging = new THREE.EdgesGeometry(geometry);
+    var segmenting = new THREE.LineSegments(edging, new THREE.LineBasicMaterial({color : 0x000000}));
+    carga3.add(segmenting);
+    meshes.push(carga3);
+    mesheColours.push(0xfff000);
 
 
+    var geometry = new THREE.TorusGeometry(0.15, 0.075, 30, 30 );
+    material = new THREE.MeshBasicMaterial({ color: 0xFF0000, wireframe: true });
+    var carga4 = new THREE.Mesh(geometry, material);
+    var edging = new THREE.EdgesGeometry(geometry);
+    var segmenting = new THREE.LineSegments(edging, new THREE.LineBasicMaterial({color : 0x000000}));
+    carga4.add(segmenting);
+    meshes.push(carga4);
+    mesheColours.push(0xfff000);
 
+
+    var geometry = new THREE.TorusKnotGeometry(0.30, 0.12, 32, 30, 2, 3 );
+    material = new THREE.MeshBasicMaterial({ color: 0xFF0000, wireframe: true });
+    var carga5 = new THREE.Mesh(geometry, material);
+    var edging = new THREE.EdgesGeometry(geometry);
+    var segmenting = new THREE.LineSegments(edging, new THREE.LineBasicMaterial({color : 0x000000}));
+    carga5.add(segmenting);
+    meshes.push(carga5);
+    mesheColours.push(0xfff000);
 
 
     //COLISAO
+
+    var rnd_position;
 
     var sphere = new THREE.SphereGeometry(0.15)
     var sphereMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });//{ color: 0xff0000, wireframe: true });
@@ -553,35 +579,93 @@ function createScene(){
     collider_carga1 = new THREE.Mesh(sphere, sphereMaterial);
     collider_carga1.position.copy(carga1.position);
     Carga1 = new THREE.Group();
-    Carga1.position.set(3, 0.125, 3)
+    rnd_position = getRandomPosition()
+    Carga1.position.set(rnd_position.x, 0.125, rnd_position.z)
     Carga1.add(carga1, collider_carga1);
     scene.add(Carga1)
 
-
+    console.log(rnd_position);
 
     collider_carga2 = new THREE.Mesh(sphere, sphereMaterial);
     collider_carga2.position.copy(carga2.position);
     Carga2 = new THREE.Group();
-    Carga2.position.set(1, 0.125, 6)
+    rnd_position = getRandomPosition()
+    Carga2.position.set(rnd_position.x, 0.135, rnd_position.z)
     Carga2.add(carga2, collider_carga2);
     scene.add(Carga2)
+
+    console.log(rnd_position);
 
     collider_carga3 = new THREE.Mesh(sphere, sphereMaterial);
     collider_carga3.position.copy(carga3.position);
     Carga3 = new THREE.Group();
-    Carga3.position.set(6, 0, 5)
-    collider_carga3.position.y += 0.125;
+    rnd_position = getRandomPosition()
+    Carga3.position.set(rnd_position.x, 0.135, rnd_position.z)
     Carga3.add(carga3, collider_carga3);
     scene.add(Carga3)
 
+    console.log(rnd_position);
 
 
+    collider_carga4 = new THREE.Mesh(sphere, sphereMaterial);
+    collider_carga4.position.copy(carga4.position);
+    Carga4 = new THREE.Group();
+    rnd_position = getRandomPosition()
+    Carga4.position.set(rnd_position.x, 0.25, rnd_position.z)
+    collider_carga4.position.y += 0.06;
+    Carga4.add(carga4, collider_carga4);
+    scene.add(Carga4)
+
+    console.log(rnd_position);
 
 
+    collider_carga5 = new THREE.Mesh(sphere, sphereMaterial);
+    collider_carga5.position.copy(carga5.position);
+    Carga5 = new THREE.Group();
+    rnd_position = getRandomPosition()
+    Carga5.position.set(rnd_position.x, 0.53, rnd_position.z)
+    collider_carga5.position.y += 0.5;
+    Carga5.add(carga5, collider_carga5);
+    scene.add(Carga5)
+
+    console.log(rnd_position);
 
 
 
     scene.add(new THREE.AxesHelper(10));
+}
+
+var generatedPositions = [];
+
+function getRandomPosition() {
+    // Generate random x and z coordinates within bounds
+    var x = (Math.random() * 12) - 6; // Range: -6 to 6 carga needs to be reachable
+    var z = (Math.random() * 12) - 6; // Range: -6 to 6
+
+    for (var pos of generatedPositions) {
+        if (pos.x === x && pos.z === z) {
+            return getRandomPosition();
+        }
+    }
+
+    //base contentor centro-> (4 + 0.1,0.1,6)   size -> (1.2, 0.2, 2.2)
+    if (x < 4.1 + 1.2/2.0 + 0.5 && x > 4.1 - 1.2/2.0 - 0.5 && z < 6 + 2.2/2.0 + 0.5 && z > 6 - 2.2/2.0 - 0.5){
+        return getRandomPosition();
+    }
+
+    //base grua centro->(0, 0.5, 0)  size->(3, 1 , 3)
+    if (x < 0 + 3/2.0 + 1 && x > 0 - 3/2.0 - 1 && z < 0 + 3/2.0 + 1 && z > 0 - 3/2.0 - 1){
+        return getRandomPosition();
+    }
+
+
+    //console.log([x, z])
+
+    //all must have more 0.5 from each base to not me to close when created
+
+    //TODO check for limit base and contetor
+    generatedPositions.push([x, z])
+    return { x, z };
 }
 
 // Função para verificar colisão entre duas esferas
@@ -589,6 +673,8 @@ function checkCollision() {
     var distance_cargo_1 = collider_Garra.getWorldPosition(new THREE.Vector3()).distanceToSquared(collider_carga1.getWorldPosition(new THREE.Vector3()));
     var distance_cargo_2 = collider_Garra.getWorldPosition(new THREE.Vector3()).distanceToSquared(collider_carga2.getWorldPosition(new THREE.Vector3()));
     var distance_cargo_3 = collider_Garra.getWorldPosition(new THREE.Vector3()).distanceToSquared(collider_carga3.getWorldPosition(new THREE.Vector3()));
+    var distance_cargo_4 = collider_Garra.getWorldPosition(new THREE.Vector3()).distanceToSquared(collider_carga4.getWorldPosition(new THREE.Vector3()));
+    var distance_cargo_5 = collider_Garra.getWorldPosition(new THREE.Vector3()).distanceToSquared(collider_carga5.getWorldPosition(new THREE.Vector3()));
     var minDistanceSquared = 0.25 * 0.25;
 
     if (distance_cargo_1 < minDistanceSquared) {
@@ -603,6 +689,16 @@ function checkCollision() {
     }
     if (distance_cargo_3 < minDistanceSquared) {
         collided_cargo = Carga3;
+        place_cargo = true;
+        return true;
+    }
+    if (distance_cargo_4 < minDistanceSquared) {
+        collided_cargo = Carga4;
+        place_cargo = true;
+        return true;
+    }
+    if (distance_cargo_5 < minDistanceSquared) {
+        collided_cargo = Carga5;
         place_cargo = true;
         return true;
     }
@@ -629,6 +725,7 @@ function init() {
 
 var Test_moviment = false;
 
+
 var close_claw = false;
 var moveCargo = false;
 var place_cargo = false;
@@ -646,6 +743,8 @@ var lock_movement = false;
 var cargo_aux = 0;
 
 let previousTime = performance.now(); // Variable to store the previous timestamp
+
+var Knot_torus_diff = 0;
 
 function animate() {
 
@@ -721,7 +820,7 @@ function animate() {
     }
 
     if (Test_moviment){
-        if (SuperiorGroup.rotation.y<0.785){
+/*         if (SuperiorGroup.rotation.y<0.785){
             topPositiveRotation = true
         }else{
             topPositiveRotation = false
@@ -737,7 +836,7 @@ function animate() {
             NegativeGarraLift = true
         }else{
             NegativeGarraLift = false
-        }
+        } */
     }
 
     if(back_to_origin){
@@ -780,8 +879,9 @@ function animate() {
 
     if(moveCargo){
         collided_cargo.position.copy(collider_Garra.getWorldPosition(new THREE.Vector3()));
-        if (collided_cargo.children[1] == collider_carga3){
-            cargo_aux = 0.15;
+        if (collided_cargo.children[1] == collider_carga5){
+            cargo_aux = 0.5;
+            Knot_torus_diff = 0.8;
         }
         collided_cargo.remove(collided_cargo.children[1]);
         
@@ -855,7 +955,7 @@ function animate() {
 
         if(go_back == false){
             if (rotate_cargo){
-                if (SuperiorGroup.rotation.y<0.58){
+                if (SuperiorGroup.rotation.y<0.57){
                     topPositiveRotation = true;
                 }else{
                     topPositiveRotation = false;
@@ -877,9 +977,10 @@ function animate() {
         }
 
         if(lower_claw){
-            if (Garra.position.y>-6.80){
+            if (Garra.position.y>-6.8 + Knot_torus_diff){
                     NegativeGarraLift = true;
             }else{
+                    Knot_torus_diff = 0;
                     NegativeGarraLift = false;
                     lower_claw = false;
                     PositiveGarraOpen = false;
