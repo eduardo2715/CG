@@ -943,7 +943,7 @@ function animate() {
         }
 
         if (move_car){
-            //go_back = false;
+            go_back = false;
             if (carrinhoAndCaboGroup.position.z<-0.4){
                 PositiveCarrinhoMoviment = true
             }else{
