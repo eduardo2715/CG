@@ -564,16 +564,18 @@ function createScene(){
 
     var rnd_position;
 
-    var sphere = new THREE.SphereGeometry(0.15)
-    var sphereMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });//{ color: 0xff0000, wireframe: true });
+    var sphere = new THREE.SphereGeometry(0.2)
+    var sphereMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 })//{ color: 0xffffff, wireframe: true });
 
 
     collider_Garra = new THREE.Mesh(sphere, sphereMaterial);
+    collider_Garra.garraRadius = 0.15;
     collider_Garra.position.copy(blocoGancho.position);
     scene.add(collider_Garra)
     Garra.add(collider_Garra);
 
     collider_carga1 = new THREE.Mesh(sphere, sphereMaterial);
+    collider_carga1.radius = 0.2;
     collider_carga1.position.copy(carga1.position);
     Carga1 = new THREE.Group();
     rnd_position = getRandomPosition()
@@ -584,6 +586,7 @@ function createScene(){
     console.log(rnd_position);
 
     collider_carga2 = new THREE.Mesh(sphere, sphereMaterial);
+    collider_carga2.radius = 0.2;
     collider_carga2.position.copy(carga2.position);
     Carga2 = new THREE.Group();
     rnd_position = getRandomPosition()
@@ -594,6 +597,7 @@ function createScene(){
     console.log(rnd_position);
 
     collider_carga3 = new THREE.Mesh(sphere, sphereMaterial);
+    collider_carga3.radius = 0.2;
     collider_carga3.position.copy(carga3.position);
     Carga3 = new THREE.Group();
     rnd_position = getRandomPosition()
@@ -603,25 +607,29 @@ function createScene(){
 
     console.log(rnd_position);
 
+    var sphere = new THREE.SphereGeometry(0.3)
+
 
     collider_carga4 = new THREE.Mesh(sphere, sphereMaterial);
+    collider_carga4.radius = 0.3;
     collider_carga4.position.copy(carga4.position);
     Carga4 = new THREE.Group();
     rnd_position = getRandomPosition()
     Carga4.position.set(rnd_position.x, 0.25, rnd_position.z)
-    collider_carga4.position.y += 0.06;
     Carga4.add(carga4, collider_carga4);
     scene.add(Carga4)
 
     console.log(rnd_position);
 
+    var sphere = new THREE.SphereGeometry(0.6)
+
 
     collider_carga5 = new THREE.Mesh(sphere, sphereMaterial);
+    collider_carga5.radius = 0.6;
     collider_carga5.position.copy(carga5.position);
     Carga5 = new THREE.Group();
     rnd_position = getRandomPosition()
     Carga5.position.set(rnd_position.x, 0.53, rnd_position.z)
-    collider_carga5.position.y += 0.5;
     Carga5.add(carga5, collider_carga5);
     scene.add(Carga5)
 
@@ -667,17 +675,76 @@ function getRandomPosition() {
 
 // Função para verificar colisão entre duas esferas
 function checkCollision() {
-    var distance_cargo_1 = collider_Garra.getWorldPosition(new THREE.Vector3()).distanceToSquared(collider_carga1.getWorldPosition(new THREE.Vector3()));
-    var distance_cargo_2 = collider_Garra.getWorldPosition(new THREE.Vector3()).distanceToSquared(collider_carga2.getWorldPosition(new THREE.Vector3()));
-    var distance_cargo_3 = collider_Garra.getWorldPosition(new THREE.Vector3()).distanceToSquared(collider_carga3.getWorldPosition(new THREE.Vector3()));
-    var distance_cargo_4 = collider_Garra.getWorldPosition(new THREE.Vector3()).distanceToSquared(collider_carga4.getWorldPosition(new THREE.Vector3()));
-    var distance_cargo_5 = collider_Garra.getWorldPosition(new THREE.Vector3()).distanceToSquared(collider_carga5.getWorldPosition(new THREE.Vector3()));
-    var minDistanceSquared = 0.25 * 0.25;
+    var distances = [
+        collider_Garra.getWorldPosition(new THREE.Vector3()).distanceToSquared(collider_carga1.getWorldPosition(new THREE.Vector3())),
+        collider_Garra.getWorldPosition(new THREE.Vector3()).distanceToSquared(collider_carga2.getWorldPosition(new THREE.Vector3())),
+        collider_Garra.getWorldPosition(new THREE.Vector3()).distanceToSquared(collider_carga3.getWorldPosition(new THREE.Vector3())),
+        collider_Garra.getWorldPosition(new THREE.Vector3()).distanceToSquared(collider_carga4.getWorldPosition(new THREE.Vector3())),
+        collider_Garra.getWorldPosition(new THREE.Vector3()).distanceToSquared(collider_carga5.getWorldPosition(new THREE.Vector3()))
+    ];
 
-    if (distance_cargo_1 < minDistanceSquared) {
+    var minDistanceSquaredIndex = distances.indexOf(Math.min(...distances)); // Index of the closest cargo
+
+    var minDistanceSquared = distances[minDistanceSquaredIndex];
+    var collider_cargo;
+
+    switch (minDistanceSquaredIndex) {
+        case 0:
+            collider_cargo = Carga1;
+            break;
+        case 1:
+            collider_cargo = Carga2;
+            break;
+        case 2:
+            collider_cargo = Carga3;
+            break;
+        case 3:
+            collider_cargo = Carga4;
+            break;
+        case 4:
+            collider_cargo = Carga5;
+            break;
+        default:
+            break;
+    }
+
+    var radius;
+    switch (minDistanceSquaredIndex) {
+        case 0:
+            radius = collider_carga1.radius;
+            break;
+        case 1:
+            radius = collider_carga2.radius;
+            break;
+        case 2:
+            radius = collider_carga3.radius;
+            break;
+        case 3:
+            radius = collider_carga4.radius;
+            break;
+        case 4:
+            radius = collider_carga5.radius;
+            break;
+        default:
+            break;
+    }
+
+    var minDistanceSquaredWithRadius = (collider_Garra.garraRadius + radius) * (collider_Garra.garraRadius + radius);
+
+
+    if (minDistanceSquared < minDistanceSquaredWithRadius) {
+        collided_cargo = collider_cargo;
+        place_cargo = true;
+        return true;
+    }
+
+
+    
+/*     if (distance_cargo_1 < minDistanceSquared) {
         collided_cargo = Carga1;
         place_cargo = true;
         return true;
+
     }
     if (distance_cargo_2 < minDistanceSquared) {
         collided_cargo = Carga2;
@@ -698,7 +765,7 @@ function checkCollision() {
         collided_cargo = Carga5;
         place_cargo = true;
         return true;
-    }
+    } */
     return false;
 }
 
