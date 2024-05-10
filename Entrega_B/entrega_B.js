@@ -24,7 +24,7 @@ var cameraFront, cameraTop, cameraSide, cameraOrth, cameraPers, cameraMove;
 
 function updateHUD() {
     var keysMap = {
-        "48" : "0", "49": "1", "50": "2", "51": "3", "52": "4", "53": "5", "54": "6", "55": "7", "56" : "8" , // Number keys
+        "48" : "0", "49": "1", "50": "2", "51": "3", "52": "4", "53": "5", "54": "6", "55": "7", // Number keys
         "81": "Q", "65": "A", "87": "W", "83": "S", "69": "E", "68": "D", // QWERTY keys
         "82": "R", "70": "F"// Additional keys
     };
@@ -345,9 +345,6 @@ function onkeydown(e){
             console.log("Material State before toggle:", materialstate);
             break;
 
-        case 56: //8
-            Test_moviment = true;
-            break;
         case 48: //0
             back_to_origin = true;
             break;
@@ -639,8 +636,8 @@ var generatedPositions = [];
 
 function getRandomPosition() {
     // Generate random x and z coordinates within bounds
-    var x = (Math.random() * 12) - 6; // Range: -6 to 6 carga needs to be reachable
-    var z = (Math.random() * 12) - 6; // Range: -6 to 6
+    var x = (Math.random() * 10) - 5; // Range: -5 to 5 carga needs to be reachable
+    var z = (Math.random() * 10) - 5; // Range: -5 to 5
 
     for (var pos of generatedPositions) {
         if (pos.x === x && pos.z === z) {
@@ -656,7 +653,7 @@ function getRandomPosition() {
     //base grua centro->(0, 0.5, 0)  size->(3, 1 , 3)
     if (x < 0 + 3/2.0 + 1 && x > 0 - 3/2.0 - 1 && z < 0 + 3/2.0 + 1 && z > 0 - 3/2.0 - 1){
         return getRandomPosition();
-    }
+    } 
 
 
     //console.log([x, z])
@@ -666,7 +663,7 @@ function getRandomPosition() {
     //TODO check for limit base and contetor
     generatedPositions.push([x, z])
     return { x, z };
-}
+} 
 
 // Função para verificar colisão entre duas esferas
 function checkCollision() {
@@ -817,26 +814,6 @@ function animate() {
             Dedo_4.rotation.z -= 0.01 * deltaTime; // Scale rotation by deltaTime
             Dedo_4.position.y += 0.001 * deltaTime; // Scale position change by deltaTime
         }
-    }
-
-    if (Test_moviment){
-/*         if (SuperiorGroup.rotation.y<0.785){
-            topPositiveRotation = true
-        }else{
-            topPositiveRotation = false
-        }
-
-        if (carrinhoAndCaboGroup.position.z>-3.45){
-            NegativeCarrinhoMoviment = true
-        }else{
-            NegativeCarrinhoMoviment = false
-        }
-
-        if (Garra.position.y>-7.1){
-            NegativeGarraLift = true
-        }else{
-            NegativeGarraLift = false
-        } */
     }
 
     if(back_to_origin){
