@@ -808,34 +808,6 @@ function checkCollision() {
     return true;
   }
 
-
-
-  /*     if (distance_cargo_1 < minDistanceSquared) {
-          collided_cargo = Carga1;
-          place_cargo = true;
-          return true;
-
-      }
-      if (distance_cargo_2 < minDistanceSquared) {
-          collided_cargo = Carga2;
-          place_cargo = true;
-          return true;
-      }
-      if (distance_cargo_3 < minDistanceSquared) {
-          collided_cargo = Carga3;
-          place_cargo = true;
-          return true;
-      }
-      if (distance_cargo_4 < minDistanceSquared) {
-          collided_cargo = Carga4;
-          place_cargo = true;
-          return true;
-      }
-      if (distance_cargo_5 < minDistanceSquared) {
-          collided_cargo = Carga5;
-          place_cargo = true;
-          return true;
-      } */
   return false;
 }
 
@@ -856,8 +828,6 @@ function init() {
   window.addEventListener("keydown", onkeydown);
   window.addEventListener("keyup", onkeyup);
 }
-
-var Test_moviment = false;
 
 
 var close_claw = false;
