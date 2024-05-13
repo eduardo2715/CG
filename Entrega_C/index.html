@@ -229,6 +229,13 @@
            
         }
 
+        function animateCubes(cubes) {
+            cubes.slice(1).forEach(function(cube) {
+                cube.rotation.x += 0.01; // Rotate around the X axis
+                cube.rotation.z += 0.01; // Rotate around the Y axis
+            });
+        }
+
         var level1Jumping = true, level2Jumping = true, level3Jumping = true;
         var level1JumpSpeed = 0.1, level2JumpSpeed = 0.1, level3JumpSpeed = 0.1; // Adjust as needed
 
@@ -283,6 +290,10 @@
             }
 
             all_objects.rotation.y += 0.01
+
+            animateCubes(level_1.children);
+            animateCubes(level_2.children);
+            animateCubes(level_3.children);
 
             render()
             requestAnimationFrame(animate);
