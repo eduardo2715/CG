@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Three.js Cylinder with Cameras</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        var scene, cameraTop, cameraFront, renderer, cylinder;
+        var switchCamera = false;
+        var camera
+        var mobiusStripMesh
+        var all_objects;
+        var level_1, level_2, level_3;
+
+        function createMobiusStrip(){
+            function mobiusStrip(radius, width, height, segments) {
+            var mobiusStrip = new THREE.ParametricGeometry(function(u, v, target) {
+                var phi = u * Math.PI * 2 * 2; // Double the angle for two full revolutions
+                var major = radius + width * v * Math.cos(phi / 2);
+                var x = major * Math.cos(phi);
+                var y = major * Math.sin(phi);
+                var z = width * v * Math.sin(phi / 2);
+                target.set(x, z, y);
+            }, segments, segments);
+            return mobiusStrip;
+            }
+
+            var mobiusStripGeometry = mobiusStrip(2, 0.5, 0.5, 64); // Half the size
+  
+            var mobiusStripMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff, side: THREE.DoubleSide });
+
+            mobiusStripMesh = new THREE.Mesh(mobiusStripGeometry, mobiusStripMaterial);
+
+            mobiusStripMesh.position.y = 1;
+            
+
+            return mobiusStripMesh;
+        }
+
+        function createCylinder(radius, height){
+            // Cylinder
+            var shape = new THREE.Shape();
+            shape.moveTo(1, 0);
+            shape.absarc(0, 0, radius, 0, Math.PI * 2, false);
+
+            var extrudeSettings = {
+                steps: 1,
+                depth: height,
+                bevelEnabled: false,
+                curveSegments: 64
+            };
+
+            var geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            var material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            cylinder = new THREE.Mesh(geometry, material);
+            cylinder.rotation.x = Math.PI / 2; // Rotate cylinder to align along y-axis
+            
+            return cylinder;
+        }
+
+        function createRing(intRadius, extRadius, height, extrudeHeight) {
+            var shape = new THREE.Shape();
+            shape.absarc(0, 0, extRadius, 0, Math.PI * 2, false);
+
+            var hole = new THREE.Path();
+            hole.absarc(0, 0, intRadius, 0, Math.PI * 2, true);
+            shape.holes.push(hole);
+
+            var extrudeSettings = {
+                steps: 1,
+                depth: extrudeHeight,
+                bevelEnabled: false
+            };
+
+            var geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            geometry.rotateX(Math.PI / 2); // Rotate to align with y-axis
+            //geometry.set.y(height)
+            geometry.translate(0, height, 0); // Move down to align bottom at y = 0
+
+            var material = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
+            var mesh = new THREE.Mesh(geometry, material);
+            //scene.add(mesh);
+
+            return mesh;
+        }
+
+        function createRingFigures(radius, height, level){
+            //only cubes
+
+            var cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+            var cubeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+
+            var angleIncrement = Math.PI / 4; // 45 degrees in radians
+            var cubePositions = [];
+            for (var i = 0; i < 8; i++) {
+                var angle = i * angleIncrement;
+                var x = radius * Math.cos(angle);
+                var z = radius * Math.sin(angle);
+                cubePositions.push({ x: x, z: z, angle: angle });
+            }
+            var cubes = [];
+            cubePositions.forEach(function (pos) {
+                var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                cube.position.set(pos.x, height, pos.z);
+                cubes.push(cube);
+                level.add(cube);
+                //scene.add(cube);
+            });
+
+
+        }
+
+        function createCameras(){
+            /* cameraTop = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            cameraTop.position.set(0, 20, 0);
+            cameraTop.lookAt(0, 0, 0); */
+
+            var aspectRatio = window.innerWidth / window.innerHeight;
+            var width = 100; // Adjust as needed based on your scene size
+            var height = width / aspectRatio;
+            cameraTop = new THREE.OrthographicCamera(
+                width / -2,   // Left
+                width / 2,    // Right
+                height / 2,   // Top
+                height / -2,  // Bottom
+                0.1,          // Near plane
+                1000          // Far plane
+            );
+            cameraTop.position.set(0, 100, 0); // Adjust the Z position to change the "zoom" level
+            cameraTop.lookAt(scene.position);
+
+            cameraFront = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            cameraFront.position.set(40, -9, 40);
+            cameraFront.lookAt(0, -9, 0);
+        }
+
+        function render(){
+            renderer.render(scene, camera);
+        }
+
+        function onResize() {
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            if (window.innerHeight > 0 && window.innerWidth > 0) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+            }
+
+        }
+
+        function onkeydown(e){
+
+            switch(e.keyCode){
+            case 76: //l
+            case 108: //L
+                switchCamera = !switchCamera;
+                break;
+            
+            case 65: //A
+            case 97: //a
+                scene.traverse(function (node){
+                    if(node instanceof THREE.Mesh){
+                        node.material.wireframe = !node.material.wireframe;
+                    }
+                });
+                break;
+            }
+        }
+
+        function createScene(){
+            scene = new THREE.Scene();
+            var ring_1, ring_2, ring_3;
+            all_objects = new THREE.Group();
+            level_1 = new THREE.Group();
+            level_2 = new THREE.Group();
+            level_3 = new THREE.Group();
+
+
+            cylinder = createCylinder(4.5, 18);
+            
+            ring_1 = createRing(4.5, 7.5, -2 , 1);
+            level_1.add(ring_1)
+            createRingFigures(6, -2 + 1, level_1);
+            //scene.add(level_1);
+
+            ring_2 = createRing(7.5, 10.5, -2 , 1);
+            level_2.add(ring_2)
+            createRingFigures(9, -2 + 1, level_2);
+            level_2.position.set(0,-9,0)
+            //scene.add(level_2);
+
+            ring_3 = createRing(10.5, 13.5, -2 , 1);
+            level_3.add(ring_3)
+            createRingFigures(12, -2 + 1, level_3);
+            level_3.position.set(0,-17,0)
+            //scene.add(level_3);
+
+
+            mobiusStrip = createMobiusStrip();
+
+
+            all_objects.add(cylinder, mobiusStrip, level_1, level_2, level_3);
+            scene.add(all_objects);
+            scene.add(new THREE.AxesHelper(10));
+        }
+
+        function init() {
+            // Renderer
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+            
+            //Scene
+            createScene();
+            // Cameras
+            createCameras();
+            
+            
+            window.addEventListener("resize", onResize)
+            window.addEventListener("keydown", onkeydown);
+
+           
+        }
+
+        var level1Jumping = true, level2Jumping = true, level3Jumping = true;
+        var level1JumpSpeed = 0.1, level2JumpSpeed = 0.1, level3JumpSpeed = 0.1; // Adjust as needed
+
+        function animate() {
+            
+            if (switchCamera) {
+                camera = cameraFront;
+            } else {
+                camera = cameraTop;
+            }
+
+
+            if (level_1.position.y >= 2) {
+                level1Jumping = false;
+            } else if (level_1.position.y <= -15) {
+                level1Jumping = true;
+            }
+
+            // Update position based on animation state
+            if (level1Jumping) {
+                level_1.position.y += level1JumpSpeed;
+            } else {
+                level_1.position.y -= level1JumpSpeed;
+            }
+
+
+            if (level_2.position.y >= 2) {
+                level2Jumping = false;
+            } else if (level_2.position.y <= -15) {
+                level2Jumping = true;
+            }
+
+            // Update position based on animation state
+            if (level2Jumping) {
+                level_2.position.y += level2JumpSpeed;
+            } else {
+                level_2.position.y -= level2JumpSpeed;
+            }
+
+
+            if (level_3.position.y >= 2) {
+                level3Jumping = false;
+            } else if (level_3.position.y <= -15) {
+                level3Jumping = true;
+            }
+
+            // Update position based on animation state
+            if (level3Jumping) {
+                level_3.position.y += level3JumpSpeed;
+            } else {
+                level_3.position.y -= level3JumpSpeed;
+            }
+
+            all_objects.rotation.y += 0.01
+
+            render()
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        animate();
+
+    </script>
+</body>
+</html>
