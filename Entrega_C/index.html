@@ -18,29 +18,117 @@
         var all_objects;
         var level_1, level_2, level_3;
         var level_1_lights, level_2_lights, level_3_lights;
+        var objects = [];
 
-        function createMobiusStrip(){
-            function mobiusStrip(radius, width, height, segments) {
-            var mobiusStrip = new THREE.ParametricGeometry(function(u, v, target) {
-                var phi = u * Math.PI * 2 * 2; // Double the angle for two full revolutions
-                var major = radius + width * v * Math.cos(phi / 2);
-                var x = major * Math.cos(phi);
-                var y = major * Math.sin(phi);
-                var z = width * v * Math.sin(phi / 2);
-                target.set(x, z, y);
-            }, segments, segments);
-            return mobiusStrip;
+        var materials = {
+            Lambert: new THREE.MeshLambertMaterial({ color: 0xff0000 ,  side: THREE.DoubleSide}),
+            Phong: new THREE.MeshPhongMaterial({ color: 0xff0000 ,  side: THREE.DoubleSide}),
+            Toon: new THREE.MeshToonMaterial({ color: 0xff0000 ,  side: THREE.DoubleSide}),
+            Normal: new THREE.MeshNormalMaterial({side: THREE.DoubleSide})
+        };
+
+        // Function to switch material and shading type
+        function switchMaterial(material) {
+            objects.forEach(function (obj) {
+                obj.material = materials[material];
+            });
+        }
+        // Function to switch shading type
+        function switchShading(shading) {
+            objects.forEach(function (obj) {
+                if (obj.material) {
+                    obj.material.flatShading = shading;
+                }
+            });
+        }
+
+        function createOneSheetHyperboloid(){
+            // Define the hyperboloid function
+            function hyperboloid(u, v, target) {
+                const a = 0.25; // Size parameter
+                const b = 0.25; // Size parameter
+                const c = 0.25; // Size parameter
+                const theta = 2 * Math.PI * u;
+                const phi = Math.PI * v - Math.PI / 2;
+                const x1 = a * Math.cosh(phi) * Math.cos(theta);
+                const y1 = b * Math.cosh(phi) * Math.sin(theta);
+                const z1 = c * Math.sinh(phi);
+                target.set(x1, y1, z1);
             }
 
-            var mobiusStripGeometry = mobiusStrip(2, 0.5, 0.5, 64); // Half the size
-  
-            var mobiusStripMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 , side: THREE.DoubleSide });
+            // Create the hyperboloid geometry
+            const geometry = new THREE.ParametricGeometry(hyperboloid, 20, 20);
 
-            mobiusStripMesh = new THREE.Mesh(mobiusStripGeometry, mobiusStripMaterial);
+            // Create the material
+            const material = new THREE.MeshStandardMaterial({ color: 0xff0000 , side: THREE.DoubleSide });
+
+            // Create the mesh
+            const oneSheetHyperboloid = new THREE.Mesh(geometry, material);
+
+            return oneSheetHyperboloid;
+        }
+
+        function createTorusParametricGeometry() {
+            // Define parametric function
+            const parametricFunction = function (u, v, vector) {
+                u *= Math.PI * 2;
+                v *= Math.PI * 2;
+
+                const x = Math.cos(u) * (2 + Math.cos(v));
+                const y = Math.sin(u) * (2 + Math.cos(v));
+                const z = Math.sin(v);
+
+                vector.set(x/4, y/4, z/4);
+            };
+
+            // Create parametric geometry
+            const geometry = new THREE.ParametricGeometry(parametricFunction, 64, 64);
+
+            // Create a material
+            const material = new THREE.MeshStandardMaterial({ color: 0x00ff00});
+
+            const mesh = new THREE.Mesh(geometry, material);
+
+            // Create a mesh and return it
+            return mesh;
+        }
+
+        function createHalfSphearGeometry() {
+            var geometry = new THREE.ParametricGeometry(function(u, v, vector) {
+                var x = Math.sin(u * Math.PI) * Math.cos(v * Math.PI);
+                var y = Math.sin(u * Math.PI) * Math.sin(v * Math.PI);
+                var z = Math.cos(u * Math.PI);
+                vector.set(x, y, z).multiplyScalar(0.75);
+            }, 20, 20);
+
+            var material = new THREE.MeshStandardMaterial({ color: 0xff0000});
+            var mesh = new THREE.Mesh(geometry, material);
+
+            return mesh; // Return mesh for further manipulation if needed
+        }
+
+        function createMobiusStrip(){
+            const mobiusFunction = function(u, t, target) {
+            u = u - 0.5;
+            t *= Math.PI * 2;
+
+            const x = Math.cos(t) * (1 + 0.5 * u * Math.cos(t / 2));
+            const y = Math.sin(t) * (1 + 0.5 * u * Math.cos(t / 2));
+            const z = 0.5 * u * Math.sin(t / 2);
+
+            target.set(2*x, 2*y, 2*z);
+            };
+
+            const geometry = new THREE.ParametricGeometry(mobiusFunction, 50, 50);
+
+            // Material and mesh
+            const mobiusStripMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
+            const mobiusStripMesh = new THREE.Mesh(geometry, mobiusStripMaterial);
+            mobiusStripMesh.rotation.x += Math.PI/2;
 
             mobiusStripMesh.position.y = 1;
             
-
+            objects.push(mobiusStripMesh);
             return mobiusStripMesh;
         }
 
@@ -61,7 +149,8 @@
             var material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
             cylinder = new THREE.Mesh(geometry, material);
             cylinder.rotation.x = Math.PI / 2; // Rotate cylinder to align along y-axis
-            
+            objects.push(cylinder);
+
             return cylinder;
         }
 
@@ -86,12 +175,12 @@
             geometry.translate(0, height, 0); // Move down to align bottom at y = 0
 
             var material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-            var mesh = new THREE.Mesh(geometry, material);
+            var ring = new THREE.Mesh(geometry, material);
             //scene.add(mesh);
+            objects.push(ring);
 
-            return mesh;
+            return ring;
         }
-
 
         function createSpotlightsForCubes(cubePositions, level_lights) {
             cubePositions.forEach(function(pos) {
@@ -136,15 +225,26 @@
                 cubePositions.push(new THREE.Vector3(x, height + 1.5, z)); // Store cube positions as THREE.Vector3
             }
 
-            cubePositions.forEach(function(pos) {
-                var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-                cube.position.copy(pos);
-                level.add(cube);
+            cubePositions.forEach(function(pos, index) {
+                var obj;
+                if (index == 0) {  // Every third position
+                    obj = createHalfSphearGeometry();
+                } else if (index == 1) {  // Every third position after the first
+                    obj = createOneSheetHyperboloid();
+                } else if (index == 2) {  // Every third position after the second
+                    obj = createTorusParametricGeometry();
+                } else {  // Default to cube for other positions
+                    obj = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                }
+                obj.position.copy(pos);
+                level.add(obj);
+                objects.push(obj);
             });
 
             // Create spotlights for each cube
             createSpotlightsForCubes(cubePositions, level_lights);
         }
+
 
 
         function createCameras(){
@@ -171,7 +271,7 @@
             cameraFront.lookAt(0, 0, 0); */
             
             var aspectRatio = window.innerWidth / window.innerHeight;
-            var width = 100; // Adjust as needed based on your scene size
+            var width = 40; // Adjust as needed based on your scene size
             var height = width / aspectRatio;
             cameraFront = new THREE.OrthographicCamera(
                 width / -2,   // Left
@@ -181,8 +281,8 @@
                 0.1,          // Near plane
                 1000          // Far plane
             );
-            cameraFront.position.set(20, -9, -15); 
-            cameraFront.lookAt(0, -9 ,0);
+            cameraFront.position.set(10, -2, -10); 
+            cameraFront.lookAt(0, 0 ,0);
         }
 
         function render(){
@@ -198,6 +298,30 @@
                 camera.updateProjectionMatrix();
             }
 
+        }
+
+        function toggleSpotlightHelpersVisibility(visibility) {
+            level_1_lights.children.forEach(function (child) {
+                if (child instanceof THREE.SpotLightHelper) {
+                    child.visible = visibility;
+                }
+            });
+            level_2_lights.children.forEach(function (child) {
+                if (child instanceof THREE.SpotLightHelper) {
+                    child.visible = visibility;
+                }
+            });
+            level_3_lights.children.forEach(function (child) {
+                if (child instanceof THREE.SpotLightHelper) {
+                    child.visible = visibility;
+                }
+            });
+        }
+
+        function toggleSpotlights() {
+            level_1_lights.visible = !level_1_lights.visible;
+            level_2_lights.visible = !level_2_lights.visible;
+            level_3_lights.visible = !level_3_lights.visible;
         }
 
         function onkeydown(e){
@@ -217,6 +341,35 @@
                 case 52: //4
                     switchCamera = !switchCamera;
                     break;
+              
+                case 83: // S key
+                case 115: // s key
+                    toggleSpotlights();
+                    break;
+                
+                case 81: // Q
+                case 113: // q
+                    switchMaterial('Lambert');
+                    switchShading(THREE.SmoothShading); // Gouraud (diffuse) shading
+                    break;
+                case 87: // W
+                case 119: // w
+                    switchMaterial('Phong');
+                    switchShading(THREE.SmoothShading); // Phong shading
+                    break;
+                case 69: // E
+                case 101: // e
+                    switchMaterial('Toon');
+                    switchShading(THREE.SmoothShading); // Cartoon shading
+                    break;
+                case 82: // R
+                case 114: // r
+                    switchMaterial('Normal');
+                    switchShading(THREE.SmoothShading); // NormalMap shading
+                    break;
+                
+                
+                
                 
                 case 65: //A
                 case 97: //a
@@ -226,6 +379,11 @@
                         }
                     });
                 break;
+
+                case 75: // K key
+                case 107: // k key
+                    toggleSpotlightHelpersVisibility(false);
+                    break;
             }
         }
 
@@ -383,7 +541,7 @@
         function animateCubes(cubes) {
             cubes.slice(1, 9).forEach(function(cube) {
                 //cube.rotation.x += 0.01; // Rotate around the X axis
-                cube.rotation.z += 0.01; // Rotate around the Z axis
+                cube.rotation.x += 0.01; // Rotate around the Z axis
                 //cube.rotation.y += 0.01; // Rotate around the Y axis
             });
         }
@@ -498,9 +656,11 @@
 
             if (move_ring_1 == false ){
                 moveSpotLights(level_1_lights, level_1, 0 * deltaTime)
-            }if (move_ring_2 == false ){
+            }
+            if (move_ring_2 == false ){
                 moveSpotLights(level_2_lights, level_2, 0 * deltaTime)
-            }if (move_ring_3 == false){
+            }
+            if (move_ring_3 == false){
                 moveSpotLights(level_3_lights, level_3, 0 * deltaTime)
             }
             
