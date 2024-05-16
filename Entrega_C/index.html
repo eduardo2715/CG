@@ -163,7 +163,7 @@
                 0.1,          // Near plane
                 1000          // Far plane
             );
-            cameraTop.position.set(0, 100, 0); // Adjust the Z position to change the "zoom" level
+            cameraTop.position.set(0, 100, 0);
             cameraTop.lookAt(scene.position);
 
             /* cameraFront = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -181,7 +181,7 @@
                 0.1,          // Near plane
                 1000          // Far plane
             );
-            cameraFront.position.set(20, -9, -15); // Adjust the Z position to change the "zoom" level
+            cameraFront.position.set(20, -9, -15); 
             cameraFront.lookAt(0, -9 ,0);
         }
 
@@ -245,21 +245,17 @@
 
         // Função para criar o skydome com textura
         function createSkydome(texture) {
-            // Crie uma esfera grande o suficiente para envolver o carrossel
             var geometry = new THREE.SphereGeometry(90, 32, 32,0,Math.PI * 2,0,Math.PI/2);
 
-            // Carregue a textura e aplique-a ao material
             var material = new THREE.MeshBasicMaterial({
-                map: texture, // Aplique a textura carregada
-                side: THREE.BackSide // Certifique-se de que a textura seja visível por dentro da esfera
+                map: texture,
+                side: THREE.BackSide 
             });
 
-            // Crie a malha da esfera com o material
             var skydome = new THREE.Mesh(geometry, material);
 
             skydome.position.set(0,-20,0)
-
-            // Adicione o skydome à cena
+		
             scene.add(skydome);
         }
 
@@ -268,9 +264,8 @@
             var textureLoader = new THREE.TextureLoader();
             // Carregue a textura da imagem
             textureLoader.load(
-                'oskar_sky.png', // Substitua pelo caminho correto para a sua imagem
+                'oskar_sky.png',
                 function(texture) {
-                    // Chame a função para criar o skydome e passe a textura carregada como argumento
                     createSkydome(texture);
                 },
                 // Função de progresso (opcional)
@@ -283,8 +278,6 @@
                 }
             );
         }
-
-        // No seu código, chame a função para carregar a textura e criar o skydome
 
 
 
