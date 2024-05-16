@@ -243,26 +243,55 @@
             }
         }
 
-        function createSkydome() {
-                // Create a sphere geometry
-                var geometry = new THREE.SphereGeometry(90, 32, 32,0,Math.PI * 2,0,Math.PI/2);
+        // Função para criar o skydome com textura
+        function createSkydome(texture) {
+            // Crie uma esfera grande o suficiente para envolver o carrossel
+            var geometry = new THREE.SphereGeometry(90, 32, 32,0,Math.PI * 2,0,Math.PI/2);
 
-                // Apply the texture to the material
-                skyMat = new THREE.MeshPhongMaterial({ side: THREE.BackSide});
-            
-                // Create the skydome mesh
-                var skydome = new THREE.Mesh(geometry,skyMat);
+            // Carregue a textura e aplique-a ao material
+            var material = new THREE.MeshBasicMaterial({
+                map: texture, // Aplique a textura carregada
+                side: THREE.BackSide // Certifique-se de que a textura seja visível por dentro da esfera
+            });
 
-                skydome.position.set(0,-30,0);
+            // Crie a malha da esfera com o material
+            var skydome = new THREE.Mesh(geometry, material);
 
-                // Add the skydome to your scene
-                scene.add(skydome);
+            skydome.position.set(0,-20,0)
+
+            // Adicione o skydome à cena
+            scene.add(skydome);
         }
+
+        // Função para carregar a textura e criar o skydome
+        function loadTextureAndCreateSkydome() {
+            var textureLoader = new THREE.TextureLoader();
+            // Carregue a textura da imagem
+            textureLoader.load(
+                'oskar_sky.png', // Substitua pelo caminho correto para a sua imagem
+                function(texture) {
+                    // Chame a função para criar o skydome e passe a textura carregada como argumento
+                    createSkydome(texture);
+                },
+                // Função de progresso (opcional)
+                function(xhr) {
+                    console.log((xhr.loaded / xhr.total * 100) + '% carregado');
+                },
+                // Função de erro (opcional)
+                function(error) {
+                    console.log('Erro ao carregar a textura', error);
+                }
+            );
+        }
+
+        // No seu código, chame a função para carregar a textura e criar o skydome
+
+
 
         function createScene(){
             scene = new THREE.Scene();
 
-            createSkydome();
+            loadTextureAndCreateSkydome();
 
             var ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
             scene.add(ambientLight);
