@@ -154,6 +154,56 @@
             return mesh;
             }
 
+        function createComplexParametricObject_2() {
+            // Define the custom parametric function for a twisted shell-like surface with a spiral pattern
+            function customParametric(u, v, vector) {
+                const radius = 1; // Radius of the shell
+                const twist = 4; // Number of twists
+                const angle = u * Math.PI * 2 * twist;
+                const spiralFactor = 0.5; // Factor for the spiral pattern
+                const spiralHeight = v * spiralFactor; // Height of the spiral pattern
+                const x = (radius + spiralHeight * Math.cos(angle)) * Math.cos(v * Math.PI);
+                const y = (radius + spiralHeight * Math.cos(angle)) * Math.sin(v * Math.PI);
+                const z = spiralHeight * Math.sin(angle);
+                return vector.set(x, y, z);
+            }
+
+            
+
+            // Create parametric geometry
+            const parametricGeometry = new THREE.ParametricGeometry(customParametric, 50, 50);
+
+            // Material and mesh
+            const material = new THREE.MeshStandardMaterial({ color: 0xff0000, side: THREE.DoubleSide });
+            const mesh = new THREE.Mesh(parametricGeometry, material);
+
+
+            return mesh
+
+        }
+
+
+        function createParametricSurface_1() {
+            // Define the custom parametric function for a twisted saddle surface
+            function customParametric(u, v, vector) {
+                const x = u - 0.5; // Centering the saddle surface
+                const y = (Math.sin(u * Math.PI * 2) * Math.sin(v * Math.PI * 2)) * 0.5; // Warping along the y-axis
+                const z = v - 0.5; // Centering the saddle surface
+                return vector.set(x, y, z).multiplyScalar(1.5);
+            }
+
+            // Create parametric geometry
+            const parametricGeometry = new THREE.ParametricGeometry(customParametric, 25, 25);
+
+            // Material and mesh
+            const material = new THREE.MeshStandardMaterial({ color: 0xff0000, side: THREE.DoubleSide });
+            const mesh = new THREE.Mesh(parametricGeometry, material);
+            scene.add(mesh);
+
+            return mesh;
+
+        }
+
         function createMobiusStrip(){
             const mobiusFunction = function(u, t, target) {
             u = u - 0.5;
@@ -230,7 +280,10 @@
         }
 
         function createSpotlightsForCubes(cubePositions, level_lights) {
-            cubePositions.forEach(function(pos) {
+            cubePositions.forEach(function(pos, index) {
+                if (index == 1 || index == 3 || index == 5 || index == 7 || index == 2 || index == 4 || index == 6){
+                    return;
+                }
                 var spotlight;
 
                 console.log(pos)
@@ -278,12 +331,16 @@
                     obj = createHalfSphearGeometry();
                 } else if (index == 1) {  // Every third position after the first
                     obj = createOneSheetHyperboloid();
-                } else if (index == 2) {  // Every third position after the second
+                }else if (index == 2) {  // Every third position after the second
                     obj = createTorusParametricGeometry();
-                } else if (index == 3) {
+                }else if (index == 3) {
                     obj = createTwistedRibbonGeometry();
                 }else if (index == 4){  // Default to cube for other positions
                     obj = createComplexParametricObject();
+                }else if (index == 5){  // Default to cube for other positions
+                    obj = createComplexParametricObject_2();
+                }else if (index == 6) {  // Default to cube for other positions
+                    obj = createParametricSurface_1();
                 }else {  // Default to cube for other positions
                     obj = new THREE.Mesh(cubeGeometry, cubeMaterial);
                 }
@@ -332,8 +389,8 @@
                 0.1,          // Near plane
                 1000          // Far plane
             );
-            cameraFront.position.set(15, -9, -15); 
-            cameraFront.lookAt(0, -9 ,0);
+            cameraFront.position.set(15, -7, -15); 
+            cameraFront.lookAt(0, -7 ,0);
         }
 
         function render(){
@@ -606,7 +663,7 @@
 
         function moveSpotLights(level_lights, level, spotlightMoveSpeed){
             k=1;
-            for(i = 0; i < 24;i+=3){
+            for(i = 0; i < 3;i+=3){
                 level_lights.children[i].position.copy(level.children[k].getWorldPosition(new THREE.Vector3()));
                 level_lights.children[i].position.y -= 1.5;
                 level_lights.children[i].target.position.copy(level.children[k].getWorldPosition(new THREE.Vector3()));
@@ -618,7 +675,7 @@
 
         function updadteSpotlightHelper(){
 
-            for(i = 2; i<=23; i+=3){
+            for(i = 2; i<=2; i+=3){
                 level_1_lights.children[i].update()
                 level_2_lights.children[i].update()
                 level_3_lights.children[i].update()
