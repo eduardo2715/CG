@@ -107,6 +107,35 @@
             return mesh; // Return mesh for further manipulation if needed
         }
 
+        function createTwistedRibbonGeometry() {
+            // Define parametric geometry function for twisted ribbon
+            function twistedRibbon(u, v, target) {
+                u = u * Math.PI * 2; // Parameter u is mapped to angle in radians
+                v = (v - 0.5) * 2; // Map v from range [0, 1] to [-1, 1]
+
+                // Define ribbon's parametric equations
+                const x = Math.sin(u);
+                const y = Math.sin(v);
+                const z = Math.cos(u + v);
+
+                // Set the result vector
+                target.set(x, y, z).multiplyScalar(0.75);
+            }
+
+            // Create parametric geometry using the twistedRibbon function
+            const geometry = new THREE.ParametricGeometry(twistedRibbon, 50, 50);
+
+            const material = new THREE.MeshStandardMaterial({ color: 0xff0000, side: THREE.DoubleSide});
+
+            const mesh = new THREE.Mesh(geometry, material);
+            // Return the created geometry
+
+            return mesh;
+
+            
+        }
+
+
         function createMobiusStrip(){
             const mobiusFunction = function(u, t, target) {
             u = u - 0.5;
@@ -233,7 +262,9 @@
                     obj = createOneSheetHyperboloid();
                 } else if (index == 2) {  // Every third position after the second
                     obj = createTorusParametricGeometry();
-                } else {  // Default to cube for other positions
+                } else if (index == 3) {
+                    obj = createTwistedRibbonGeometry();
+                }else {  // Default to cube for other positions
                     obj = new THREE.Mesh(cubeGeometry, cubeMaterial);
                 }
                 obj.position.copy(pos);
