@@ -101,7 +101,7 @@
                 vector.set(x, y, z).multiplyScalar(0.75);
             }, 20, 20);
 
-            var material = new THREE.MeshStandardMaterial({ color: 0xff0000});
+            var material = new THREE.MeshStandardMaterial({ color: 0xff0000 , side: THREE.DoubleSide});
             var mesh = new THREE.Mesh(geometry, material);
 
             return mesh; // Return mesh for further manipulation if needed
@@ -135,6 +135,24 @@
             
         }
 
+        function createComplexParametricObject() {
+
+            function customParametric(u, v, vector) {
+                const r = 1 + 0.5 * Math.sin(6 * Math.PI * v);
+                const x = r * Math.cos(2 * Math.PI * u) * Math.sin(Math.PI * v);
+                const y = r * Math.sin(2 * Math.PI * u) * Math.sin(Math.PI * v);
+                const z = r * Math.cos(Math.PI * v);
+                return vector.set(x, y, z).multiplyScalar(0.75);
+            }
+            // Create parametric geometry
+            const parametricGeometry = new THREE.ParametricGeometry(customParametric, 25, 25);
+
+            // Material and mesh
+            const material = new THREE.MeshStandardMaterial({ color: 0xff0000, side: THREE.DoubleSide});
+            const mesh = new THREE.Mesh(parametricGeometry, material);
+
+            return mesh;
+            }
 
         function createMobiusStrip(){
             const mobiusFunction = function(u, t, target) {
@@ -264,6 +282,8 @@
                     obj = createTorusParametricGeometry();
                 } else if (index == 3) {
                     obj = createTwistedRibbonGeometry();
+                }else if (index == 4){  // Default to cube for other positions
+                    obj = createComplexParametricObject();
                 }else {  // Default to cube for other positions
                     obj = new THREE.Mesh(cubeGeometry, cubeMaterial);
                 }
@@ -312,8 +332,8 @@
                 0.1,          // Near plane
                 1000          // Far plane
             );
-            cameraFront.position.set(10, -2, -10); 
-            cameraFront.lookAt(0, 0 ,0);
+            cameraFront.position.set(15, -9, -15); 
+            cameraFront.lookAt(0, -9 ,0);
         }
 
         function render(){
