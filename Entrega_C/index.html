@@ -1,30 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Three.js Cylinder with Cameras</title>
-    <style>
-        body { margin: 0; }
-        canvas { display: block; }
-    </style>
-</head>
-<body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        var scene, cameraTop, cameraFront, renderer, cylinder;
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.125.2/build/three.module.js';
+
+var scene, cameraTop, cameraFront, renderer, cylinder;
         var switchCamera = false;
         var camera
-        var mobiusStripMesh
         var all_objects;
         var level_1, level_2, level_3;
         var level_1_lights, level_2_lights, level_3_lights;
+        var mobius_lights;
         var objects = [];
 
         var materials = {
             Lambert: new THREE.MeshLambertMaterial({ color: 0xff0000 ,  side: THREE.DoubleSide}),
             Phong: new THREE.MeshPhongMaterial({ color: 0xff0000 ,  side: THREE.DoubleSide}),
-            Toon: new THREE.MeshToonMaterial({ color: 0xff0000 ,  side: THREE.DoubleSide}),
-            Normal: new THREE.MeshNormalMaterial({side: THREE.DoubleSide})
+            Toon: new THREE.MeshToonMaterial({ color: 0xff0000 ,  side: THREE.DoubleSide/*, specular: 0x333333, shininess: 10  */}),
+            Normal: new THREE.MeshNormalMaterial({color: 0xff0000, side: THREE.DoubleSide})
         };
 
         // Function to switch material and shading type
@@ -32,14 +21,24 @@
             objects.forEach(function (obj) {
                 obj.material = materials[material];
             });
+            console.log(material)
         }
         // Function to switch shading type
         function switchShading(shading) {
-            objects.forEach(function (obj) {
-                if (obj.material) {
-                    obj.material.flatShading = shading;
-                }
-            });
+
+            if (shading == "gouraud"){
+                objects.forEach(function (obj) {
+                    obj.geometry.computeVertexNormals();
+                });
+            }else if (shading == "phong"){
+
+            }else if (shading == "cartoon"){
+                
+            }else if (shading == "normal"){
+                
+            }
+            console.log(shading)
+
         }
 
         function createOneSheetHyperboloid(){
@@ -182,7 +181,6 @@
 
         }
 
-
         function createParametricSurface_1() {
             // Define the custom parametric function for a twisted saddle surface
             function customParametric(u, v, vector) {
@@ -204,30 +202,58 @@
 
         }
 
-        function createMobiusStrip(){
-            const mobiusFunction = function(u, t, target) {
-            u = u - 0.5;
-            t *= Math.PI * 2;
+        function createMobiusStrip() {
+            // Initialize a fixed point
+            var p = new THREE.Vector3(0, 0, 0);
+        
+            function mobius(u, t, target) {
+                u = u - 0.5;
+                const v = t * 2 * Math.PI;
+        
+                const x = Math.cos(v) * (1 + u * 0.5 * Math.cos(v / 2));
+                const y = Math.sin(v) * (1 + u * 0.5 * Math.cos(v / 2));
+                const z = 0.5 * u * Math.sin(v / 2);
+        
+                target.set(x * 2, y * 2, z * 2);
+            }
+        
+            // Create the geometry using ParametricBufferGeometry
+            const geometry = new THREE.ParametricBufferGeometry(mobius, 100, 20);
+        
+            // Create a material
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
+        
+            // Create the mesh
+            const mobiusStrip = new THREE.Mesh(geometry, material);
+            mobiusStrip.rotation.x += Math.PI / 2;
+            mobiusStrip.position.y = 1;
+            objects.push(mobiusStrip); // Assuming objects is an array to hold your meshes
+        
 
-            const x = Math.cos(t) * (1 + 0.5 * u * Math.cos(t / 2));
-            const y = Math.sin(t) * (1 + 0.5 * u * Math.cos(t / 2));
-            const z = 0.5 * u * Math.sin(t / 2);
 
-            target.set(2*x, 2*y, 2*z);
-            };
 
-            const geometry = new THREE.ParametricGeometry(mobiusFunction, 50, 50);
+            for(let i = 0; i<=1; i+=0.125){
+                const u = 0 + i; // Adjust as needed within the range [0, 1]
+                const t = 0.2 + i; // Adjust as needed within the range [0, 1]
+                const pointOnMobius = new THREE.Vector3();
+                mobius(u, t, pointOnMobius);
 
-            // Material and mesh
-            const mobiusStripMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
-            const mobiusStripMesh = new THREE.Mesh(geometry, mobiusStripMaterial);
-            mobiusStripMesh.rotation.x += Math.PI/2;
+                const light = new THREE.PointLight(0xffffff, 0.5, 3);
+                light.position.set(pointOnMobius.x, pointOnMobius.y, pointOnMobius.z)
+                mobius_lights.add(light);
 
-            mobiusStripMesh.position.y = 1;
-            
-            objects.push(mobiusStripMesh);
-            return mobiusStripMesh;
+                console.log("Point on Mobius strip:", pointOnMobius);
+            }
+
+            mobius_lights.rotation.x += Math.PI / 2;
+            mobius_lights.position.y = 1;
+
+           
+
+
+            return mobiusStrip;
         }
+        
 
         function createCylinder(radius, height){
             // Cylinder
@@ -243,7 +269,7 @@
             };
 
             var geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-            var material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+            var material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
             cylinder = new THREE.Mesh(geometry, material);
             cylinder.rotation.x = Math.PI / 2; // Rotate cylinder to align along y-axis
             objects.push(cylinder);
@@ -268,12 +294,12 @@
 
             var geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
             geometry.rotateX(Math.PI / 2); // Rotate to align with y-axis
-            //geometry.set.y(height)
+
             geometry.translate(0, height, 0); // Move down to align bottom at y = 0
 
-            var material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+            var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
             var ring = new THREE.Mesh(geometry, material);
-            //scene.add(mesh);
+
             objects.push(ring);
 
             return ring;
@@ -281,21 +307,20 @@
 
         function createSpotlightsForCubes(cubePositions, level_lights) {
             cubePositions.forEach(function(pos, index) {
-                if (index == 1 || index == 3 || index == 5 || index == 7 || index == 2 || index == 4 || index == 6){
+                /* if (index == 1 || index == 3 || index == 5 || index == 7 || index == 2 || index == 4 || index == 6){  // only create one spotlight per ring
                     return;
-                }
-                var spotlight;
+                } */
+                var spotLight;
 
-                console.log(pos)
-                spotLight = new THREE.SpotLight( 0xffffff, 1 );
+                spotLight = new THREE.SpotLight( 0xffffff, 2);
 				spotLight.position.set( pos.x, pos.y + 0.5, pos.z);
                 spotLight.target.position.set( pos.x, pos.y + 1, pos.z);
-				spotLight.angle = Math.PI / 2;
+				spotLight.angle = Math.PI/3;
 				spotLight.penumbra = 1;
 				spotLight.decay = 1;
 				spotLight.distance = 3;
 
-				spotLight.castShadow = true;
+				spotLight.castShadow = false;
 				spotLight.shadow.mapSize.width = 1024;
 				spotLight.shadow.mapSize.height = 1024;
 				spotLight.shadow.camera.near = 1;
@@ -303,7 +328,7 @@
 				spotLight.shadow.focus = 1;
 
                 // Create a spotlight helper for debugging
-                spotLightHelper = new THREE.SpotLightHelper(spotLight);
+                var spotLightHelper = new THREE.SpotLightHelper(spotLight);
 
                 // Add spotlight, its target, and helper to the scene
                 level_lights.add(spotLight);
@@ -314,7 +339,7 @@
 
         function createRingFigures(radius, height, level, level_lights) {
             var cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
-            var cubeMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+            var cubeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 
             var angleIncrement = Math.PI / 4; // 45 degrees in radians
             var cubePositions = [];
@@ -327,7 +352,7 @@
 
             cubePositions.forEach(function(pos, index) {
                 var obj;
-                if (index == 0) {  // Every third position
+                /* if (index == 0) {  // Every third position
                     obj = createHalfSphearGeometry();
                 } else if (index == 1) {  // Every third position after the first
                     obj = createOneSheetHyperboloid();
@@ -342,8 +367,8 @@
                 }else if (index == 6) {  // Default to cube for other positions
                     obj = createParametricSurface_1();
                 }else {  // Default to cube for other positions
-                    obj = new THREE.Mesh(cubeGeometry, cubeMaterial);
-                }
+                  */   obj = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                //}
                 obj.position.copy(pos);
                 level.add(obj);
                 objects.push(obj);
@@ -353,14 +378,12 @@
             createSpotlightsForCubes(cubePositions, level_lights);
         }
 
-
-
         function createCameras(){
-            /* cameraTop = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+             cameraTop = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             cameraTop.position.set(0, 20, 0);
-            cameraTop.lookAt(0, 0, 0); */
+            cameraTop.lookAt(0, 0, 0);
 
-            var aspectRatio = window.innerWidth / window.innerHeight;
+/*             var aspectRatio = window.innerWidth / window.innerHeight;
             var width = 100; // Adjust as needed based on your scene size
             var height = width / aspectRatio;
             cameraTop = new THREE.OrthographicCamera(
@@ -372,14 +395,14 @@
                 1000          // Far plane
             );
             cameraTop.position.set(0, 100, 0);
-            cameraTop.lookAt(scene.position);
+            cameraTop.lookAt(scene.position); */
 
             /* cameraFront = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             cameraFront.position.set(20, -9, 20);
             cameraFront.lookAt(0, 0, 0); */
             
             var aspectRatio = window.innerWidth / window.innerHeight;
-            var width = 40; // Adjust as needed based on your scene size
+            var width = 6; // Adjust as needed based on your scene size
             var height = width / aspectRatio;
             cameraFront = new THREE.OrthographicCamera(
                 width / -2,   // Left
@@ -389,24 +412,24 @@
                 0.1,          // Near plane
                 1000          // Far plane
             );
-            cameraFront.position.set(15, -7, -15); 
-            cameraFront.lookAt(0, -7 ,0);
+            cameraFront.position.set(15, 1, -15); 
+            cameraFront.lookAt(0, 0 ,0);
         }
 
         function render(){
             renderer.render(scene, camera);
         }
 
-        function onResize() {
+        // function onResize() {
 
-            renderer.setSize(window.innerWidth, window.innerHeight);
+        //     renderer.setSize(window.innerWidth, window.innerHeight);
 
-            if (window.innerHeight > 0 && window.innerWidth > 0) {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-            }
+        //     if (window.innerHeight > 0 && window.innerWidth > 0) {
+        //         camera.aspect = window.innerWidth / window.innerHeight;
+        //         camera.updateProjectionMatrix();
+        //     }
 
-        }
+        // }
 
         function toggleSpotlightHelpersVisibility(visibility) {
             level_1_lights.children.forEach(function (child) {
@@ -432,6 +455,10 @@
             level_3_lights.visible = !level_3_lights.visible;
         }
 
+        function togglePointlights(){
+            mobius_lights.visible = !mobius_lights.visible;
+        }
+
         function onkeydown(e){
 
             switch(e.keyCode){
@@ -454,30 +481,32 @@
                 case 115: // s key
                     toggleSpotlights();
                     break;
-                
+                case 80: // P key
+                case 112: // p key
+                    togglePointlights();
+                    break;
+
                 case 81: // Q
                 case 113: // q
                     switchMaterial('Lambert');
-                    switchShading(THREE.SmoothShading); // Gouraud (diffuse) shading
+                    switchShading('gouraud'); // Gouraud (diffuse) shading
                     break;
                 case 87: // W
                 case 119: // w
                     switchMaterial('Phong');
-                    switchShading(THREE.SmoothShading); // Phong shading
+                    switchShading('phong'); // Phong shading
                     break;
                 case 69: // E
                 case 101: // e
                     switchMaterial('Toon');
-                    switchShading(THREE.SmoothShading); // Cartoon shading
+                    switchShading('cartoon'); // Cartoon shading
                     break;
                 case 82: // R
                 case 114: // r
                     switchMaterial('Normal');
-                    switchShading(THREE.SmoothShading); // NormalMap shading
+                    switchShading('normal'); // NormalMap shading
                     break;
-                
-                
-                
+
                 
                 case 65: //A
                 case 97: //a
@@ -491,6 +520,10 @@
                 case 75: // K key
                 case 107: // k key
                     toggleSpotlightHelpersVisibility(false);
+                    break;
+                case 76: // L key
+                case 108: // l key
+                    toggleSpotlightHelpersVisibility(true);
                     break;
             }
         }
@@ -552,15 +585,26 @@
 
             loadTextureAndCreateSkydome();
 
-            var ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+            var ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
             scene.add(ambientLight);
 
-            var directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
-            directionalLight.position.set(10, 10, 10).normalize();
+            var directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            directionalLight.position.set(12, 0, 12);
+            directionalLight.target.position.set( 0,-9,0);
+            directionalLight.castShadow = false; // Enable shadow casting
+
+            // Set up shadow properties
+            directionalLight.shadow.mapSize.width = 1024;  // Shadow map width in pixels
+            directionalLight.shadow.mapSize.height = 1024; // Shadow map height in pixels
+            directionalLight.shadow.camera.near = 0.5;     // Near plane of the shadow camera
+            directionalLight.shadow.camera.far = 50;       // Far plane of the shadow camera
+            // Set up orthographic shadow camera
+            directionalLight.shadow.camera.left = -10;
+            directionalLight.shadow.camera.right = 10;
+            directionalLight.shadow.camera.top = 10;
+            directionalLight.shadow.camera.bottom = -10;
+
             scene.add(directionalLight);
-
-
-
 
             var ring_1, ring_2, ring_3;
             all_objects = new THREE.Group();
@@ -570,6 +614,7 @@
             level_1_lights = new THREE.Group();
             level_2_lights = new THREE.Group();
             level_3_lights = new THREE.Group();
+            mobius_lights = new THREE.Group();
 
             cylinder = createCylinder(4.5, 18);
             
@@ -595,7 +640,9 @@
             //scene.add(level_3);
 
 
-            mobiusStrip = createMobiusStrip();
+            var mobiusStrip = createMobiusStrip();
+            //mobius_lights.rotation.x = Math.PI/2
+            scene.add(mobius_lights);
 
 
             all_objects.add(cylinder, mobiusStrip, level_1, level_2 , level_3);
@@ -662,8 +709,8 @@
         let previousTime = performance.now(); // Variable to store the previous timestamp
 
         function moveSpotLights(level_lights, level, spotlightMoveSpeed){
-            k=1;
-            for(i = 0; i < 3;i+=3){
+            var k=1;
+            for(var i = 0; i < 23;i+=3){ //trocar 23 para 3 para ter apenas 1 spotlight por anel
                 level_lights.children[i].position.copy(level.children[k].getWorldPosition(new THREE.Vector3()));
                 level_lights.children[i].position.y -= 1.5;
                 level_lights.children[i].target.position.copy(level.children[k].getWorldPosition(new THREE.Vector3()));
@@ -675,7 +722,7 @@
 
         function updadteSpotlightHelper(){
 
-            for(i = 2; i<=2; i+=3){
+            for(var i = 2; i<= 24; i+=3){ //trocar 24 para 2 para ter apenas 1 spotlight por anel
                 level_1_lights.children[i].update()
                 level_2_lights.children[i].update()
                 level_3_lights.children[i].update()
@@ -688,7 +735,7 @@
         function animate() {
 
             const currentTime = performance.now(); // Get the current timestamp
-            const deltaTime = (currentTime - previousTime) / 100; // Calculate the time difference since the last frame, in seconds
+            const deltaTime = (currentTime - previousTime) / 50; // Calculate the time difference since the last frame, in seconds
             previousTime = currentTime; // Update previous time
 
             updadteSpotlightHelper();
@@ -714,13 +761,12 @@
                 // Update position based on animation state
                 if (level1Jumping) {
                     moveSpotLights(level_1_lights, level_1, spotlightMoveSpeed * deltaTime)
-                    level_1.position.y += spotlightMoveSpeed * deltaTime;
+                    level_1.position.y += level1JumpSpeed * deltaTime;
                 } else {
                     moveSpotLights(level_1_lights, level_1, -spotlightMoveSpeed * deltaTime) //negative speed means reverse moviment
-                    level_1.position.y -= spotlightMoveSpeed * deltaTime;
+                    level_1.position.y -= level1JumpSpeed * deltaTime;
                 }
             }
-
 
             if (move_ring_2 ==true){
                 if (level_2.position.y >= 2) {
@@ -756,7 +802,7 @@
                 }
             }
 
-            all_objects.rotation.y += 0.01
+            all_objects.rotation.y += 0.005 * deltaTime
 
             animateCubes(level_1.children);
             animateCubes(level_2.children);
@@ -779,7 +825,3 @@
 
         init();
         animate();
-
-    </script>
-</body>
-</html>
