@@ -79,6 +79,34 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
             return oneSheetHyperboloid;
         }
 
+        function createLissajousSurface() {
+            var geometry = new THREE.ParametricGeometry(function(u, v, target) {
+                const a = 5; // Amplitude in x
+                const b = 5; // Amplitude in y
+                const c = 5; // Amplitude in z
+                const A = 1; // Frequency in x
+                const B = 2; // Frequency in y
+                const C = 3; // Frequency in z
+                const delta = Math.PI / 2; // Phase shift
+
+                u *= 2 * Math.PI; // U parameter goes from 0 to 2pi
+                v *= 2 * Math.PI; // V parameter goes from 0 to 2pi
+
+                const x = a * Math.sin(A * u + delta);
+                const y = b * Math.sin(B * v);
+                const z = c * Math.sin(C * (u + v));
+
+                target.set(x, y, z).multiplyScalar(0.12);
+            }, 64, 64);
+
+  
+            const material = new THREE.MeshStandardMaterial({ color: 0xff0000 , side: THREE.DoubleSide });
+            var mesh = new THREE.Mesh(geometry, material);
+
+            return mesh; // Return mesh for further manipulation if needed
+        }
+
+
         function createTorusParametricGeometry() {
             // Define parametric function
             const parametricFunction = function (u, v, vector) {
@@ -96,7 +124,7 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
             const geometry = new THREE.ParametricGeometry(parametricFunction, 64, 64);
 
             // Create a material
-            const material = new THREE.MeshStandardMaterial({ color: 0x00ff00});
+            const material = new THREE.MeshStandardMaterial({ color: 0xff0000});
 
             const mesh = new THREE.Mesh(geometry, material);
 
@@ -362,9 +390,20 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
                 cubePositions.push(new THREE.Vector3(x, height + 1.5, z)); // Store cube positions as THREE.Vector3
             }
 
-            cubePositions.forEach(function(pos, index) {
+            function shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            var shuffledPositions = shuffle(cubePositions);
+            
+
+            shuffledPositions.forEach(function(pos, index) {
                 var obj;
-                /* if (index == 0) {  // Every third position
+                   if (index == 0) {  // Every third position
                     obj = createHalfSphearGeometry();
                 } else if (index == 1) {  // Every third position after the first
                     obj = createOneSheetHyperboloid();
@@ -376,11 +415,14 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
                     obj = createComplexParametricObject();
                 }else if (index == 5){  // Default to cube for other positions
                     obj = createComplexParametricObject_2();
-                }else if (index == 6) {  // Default to cube for other positions
+                }else if (index == 6) {
                     obj = createParametricSurface_1();
-                }else {  // Default to cube for other positions
-                  */   obj = new THREE.Mesh(cubeGeometry, cubeMaterial);
-                //}
+                }else if (index == 7){
+                    obj = createLissajousSurface();
+                }    
+                else {  // Default to cube for other positions
+                     obj = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                  }
                 obj.position.copy(pos);
                 level.add(obj);
                 objects.push(obj);
