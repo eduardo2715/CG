@@ -744,6 +744,7 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
             document.body.appendChild(renderer.domElement);
+            document.body.appendChild( VRButton.createButton( renderer ) );
             
             //Scene
             createScene();
