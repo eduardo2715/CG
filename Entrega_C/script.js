@@ -474,16 +474,6 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
             renderer.render(scene, camera);
         }
 
-        // function onResize() {
-
-        //     renderer.setSize(window.innerWidth, window.innerHeight);
-
-        //     if (window.innerHeight > 0 && window.innerWidth > 0) {
-        //         camera.aspect = window.innerWidth / window.innerHeight;
-        //         camera.updateProjectionMatrix();
-        //     }
-
-        // }
 
         function toggleSpotlightHelpersVisibility(visibility) {
             level_1_lights.children.forEach(function (child) {
@@ -723,17 +713,14 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
             var aspectRatio = window.innerWidth / window.innerHeight;
 
             // Update aspect ratio for all cameras
+            cameraTop.aspect = aspectRatio;
+            cameraTop.updateProjectionMatrix()
+
             cameraFront.left = -10 * aspectRatio;
             cameraFront.right = 10 * aspectRatio;
             cameraFront.top = 10;
             cameraFront.bottom = -10;
             cameraFront.updateProjectionMatrix();
-
-            cameraTop.left = -10 * aspectRatio;
-            cameraTop.right = 10 * aspectRatio;
-            cameraTop.top = 10;
-            cameraTop.bottom = -10;
-            cameraTop.updateProjectionMatrix();
 
             render();
         }
