@@ -745,6 +745,9 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
             renderer.shadowMap.enabled = true;
             document.body.appendChild(renderer.domElement);
             document.body.appendChild( VRButton.createButton( renderer ) );
+            renderer.xr.enabled = true;
+
+            renderer.setAnimationLoop(animate);
             
             //Scene
             createScene();
@@ -759,10 +762,10 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
            
         }
 
-        function animateCubes(cubes) {
+        function animateCubes(cubes, time) {
             cubes.slice(1, 9).forEach(function(cube) {
                 //cube.rotation.x += 0.01; // Rotate around the X axis
-                cube.rotation.x += 0.01; // Rotate around the Z axis
+                cube.rotation.x += 0.01 * time; // Rotate around the Z axis
                 //cube.rotation.y += 0.01; // Rotate around the Y axis
             });
         }
@@ -870,9 +873,9 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
 
             all_objects.rotation.y += 0.005 * deltaTime
 
-            animateCubes(level_1.children);
-            animateCubes(level_2.children);
-            animateCubes(level_3.children);
+            animateCubes(level_1.children, deltaTime);
+            animateCubes(level_2.children, deltaTime);
+            animateCubes(level_3.children, deltaTime);
 
             if (move_ring_1 == false ){
                 moveSpotLights(level_1_lights, level_1, 0 * deltaTime)
