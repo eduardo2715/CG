@@ -747,7 +747,7 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
             document.body.appendChild( VRButton.createButton( renderer ) );
             renderer.xr.enabled = true;
 
-            renderer.setAnimationLoop(animate);
+            //renderer.setAnimationLoop(animate);
             
             //Scene
             createScene();
