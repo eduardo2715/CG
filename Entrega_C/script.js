@@ -14,7 +14,7 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
             Lambert: new THREE.MeshLambertMaterial({ color: 0xff0000, side: THREE.DoubleSide }),
             Phong: new THREE.MeshPhongMaterial({ color: 0xff0000, side: THREE.DoubleSide }),
             Toon: new THREE.MeshToonMaterial({ color: 0xff0000, side: THREE.DoubleSide }),
-            Normal: new THREE.MeshNormalMaterial({ color: 0xff0000, side: THREE.DoubleSide }),
+            Normal: new THREE.MeshNormalMaterial({ side: THREE.DoubleSide }),
             Basic: new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide }) // Add Basic material for no lighting
         };
 
@@ -24,23 +24,6 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
                 obj.material = materials[material];
             });
             console.log(material)
-        }
-        // Function to switch shading type
-        function switchShading(shading) {
-
-            if (shading == "gouraud"){
-                objects.forEach(function (obj) {
-                    obj.geometry.computeVertexNormals();
-                });
-            }else if (shading == "phong"){
-
-            }else if (shading == "cartoon"){
-                
-            }else if (shading == "normal"){
-                
-            }
-            console.log(shading)
-
         }
 
         function createOneSheetHyperboloid(){
@@ -513,22 +496,23 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
                 case 81: // Q
                 case 113: // q
                     switchMaterial('Lambert');
-                    switchShading('gouraud'); // Gouraud (diffuse) shading
+                    console.log('gouraud')
+                    //switchShading('gouraud'); // Gouraud (diffuse) shading
                     break;
                 case 87: // W
                 case 119: // w
                     switchMaterial('Phong');
-                    switchShading('phong'); // Phong shading
+                    console.log('phong')
                     break;
                 case 69: // E
                 case 101: // e
                     switchMaterial('Toon');
-                    switchShading('cartoon'); // Cartoon shading
+                    console.log('cartoon')
                     break;
                 case 82: // R
                 case 114: // r
                     switchMaterial('Normal');
-                    switchShading('normal'); // NormalMap shading
+                    console.log('normal')
                     break;
                 case 84: // T key
                 case 116: // t key
