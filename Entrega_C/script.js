@@ -426,24 +426,6 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
              cameraTop = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             cameraTop.position.set(0, 20, 0);
             cameraTop.lookAt(0, 0, 0);
-
-/*             var aspectRatio = window.innerWidth / window.innerHeight;
-            var width = 100; // Adjust as needed based on your scene size
-            var height = width / aspectRatio;
-            cameraTop = new THREE.OrthographicCamera(
-                width / -2,   // Left
-                width / 2,    // Right
-                height / 2,   // Top
-                height / -2,  // Bottom
-                0.1,          // Near plane
-                1000          // Far plane
-            );
-            cameraTop.position.set(0, 100, 0);
-            cameraTop.lookAt(scene.position); */
-
-            /* cameraFront = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            cameraFront.position.set(20, -9, 20);
-            cameraFront.lookAt(0, 0, 0); */
             
             var aspectRatio = window.innerWidth / window.innerHeight;
             var width = 45; // Adjust as needed based on your scene size
