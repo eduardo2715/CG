@@ -9,7 +9,6 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
         var mobius_lights;
         var directionalLight
         var objects = [];
-        var lightingEnabled = true;
 
         var materials = {
             Lambert: new THREE.MeshLambertMaterial({ color: 0xff0000, side: THREE.DoubleSide }),
@@ -42,15 +41,6 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
             }
             console.log(shading)
 
-        }
-
-        function toggleLighting() {
-            lightingEnabled = !lightingEnabled;
-            if (lightingEnabled) {
-                switchMaterial('Lambert'); // Default to Lambert when lighting is enabled
-            } else {
-                switchMaterial('Basic'); // Switch to Basic material when lighting is disabled
-            }
         }
 
         function createOneSheetHyperboloid(){
@@ -560,7 +550,7 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
                     break;
                 case 84: // T key
                 case 116: // t key
-                    toggleLighting();
+                    switchMaterial('Basic')
                     break;
                 
                 case 65: //A
