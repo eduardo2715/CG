@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { ConstNode } from 'three/examples/jsm/nodes/Nodes.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.125.2/build/three.module.js';
+
 
 
 var scene, cameraTop, cameraFront, renderer, material;
