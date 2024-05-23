@@ -10,7 +10,7 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
         var directionalLight
         var objects = [];
         var skydome;
-        var dome_texture;
+
 
 var materials = {
     Lambert: new THREE.MeshLambertMaterial({ color: 0xff0000, side: THREE.DoubleSide }),
@@ -575,7 +575,6 @@ function onkeyup(e) {
 function createSkydome(texture, material) {
     var geometry = new THREE.SphereGeometry(90, 32, 32,0,Math.PI * 2,0,Math.PI/2);
 
-    dome_texture = texture
     material.map = texture
 
     skydome = new THREE.Mesh(geometry, material);
@@ -609,13 +608,6 @@ function loadTextureAndCreateSkydome(material) {
 
 function createScene() {
     scene = new THREE.Scene();
-
-    // Create and configure the renderer
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;  // Enable shadow maps on the renderer
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;  // Optional: for softer shadows
-    document.body.appendChild(renderer.domElement);
 
     // Load the skydome texture
     loadTextureAndCreateSkydome(skydome_materials["Basic"]);
