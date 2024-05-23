@@ -27,6 +27,9 @@ var mesheColours = [];
 var materialstate = true;
 var cameraFront, cameraTop, cameraSide, cameraOrth, cameraPers, cameraMove;
 
+const resetRenderer = () => renderer.setSize(window.innerWidth, window.innerHeight);
+const setupRenderer = () => { resetRenderer(); document.body.appendChild(renderer.domElement); renderer.xr.enabled = true; }
+
 function updateHUD() {
   var keysMap = {
     "48": "0",

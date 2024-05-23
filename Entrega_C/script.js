@@ -9,6 +9,8 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
         var mobius_lights;
         var directionalLight
         var objects = [];
+        var skydome;
+        var dome_texture;
 
         var materials = {
             Lambert: new THREE.MeshLambertMaterial({ color: 0xff0000, side: THREE.DoubleSide }),
@@ -18,11 +20,25 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
             Basic: new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide }) // Add Basic material for no lighting
         };
 
+        var skydome_materials = {
+            Lambert: new THREE.MeshLambertMaterial({side: THREE.BackSide }),
+            Phong: new THREE.MeshPhongMaterial({ side: THREE.BackSide }),
+            Toon: new THREE.MeshToonMaterial({side: THREE.BackSide }),
+            Normal: new THREE.MeshNormalMaterial({ side: THREE.BackSide }),
+            Basic: new THREE.MeshBasicMaterial({side: THREE.BackSide }),
+        };
+
         // Function to switch material and shading type
         function switchMaterial(material) {
             objects.forEach(function (obj) {
                 obj.material = materials[material];
             });
+
+            scene.remove(skydome)
+            loadTextureAndCreateSkydome(skydome_materials[material])
+            
+            
+            //skydome.material = skydome_materials[material]
             console.log(material)
         }
 
@@ -554,15 +570,13 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
         }
 
         // Função para criar o skydome com textura
-        function createSkydome(texture) {
+        function createSkydome(texture, material) {
             var geometry = new THREE.SphereGeometry(90, 32, 32,0,Math.PI * 2,0,Math.PI/2);
 
-            var material = new THREE.MeshBasicMaterial({
-                map: texture,
-                side: THREE.BackSide 
-            });
+            dome_texture = texture
+            material.map = texture
 
-            var skydome = new THREE.Mesh(geometry, material);
+            skydome = new THREE.Mesh(geometry, material);
 
             skydome.position.set(0,-20,0)
 		
@@ -570,13 +584,13 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
         }
 
         // Função para carregar a textura e criar o skydome
-        function loadTextureAndCreateSkydome() {
+        function loadTextureAndCreateSkydome(material) {
             var textureLoader = new THREE.TextureLoader();
             // Carregue a textura da imagem
             textureLoader.load(
                 'oskar_sky.png',
                 function(texture) {
-                    createSkydome(texture);
+                    createSkydome(texture, material);
                 },
                 // Função de progresso (opcional)
                 function(xhr) {
@@ -594,7 +608,7 @@ var scene, cameraTop, cameraFront, renderer, cylinder;
         function createScene(){
             scene = new THREE.Scene();
 
-            loadTextureAndCreateSkydome();
+            loadTextureAndCreateSkydome(skydome_materials["Basic"]);
 
             var ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
             scene.add(ambientLight);
