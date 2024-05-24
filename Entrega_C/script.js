@@ -259,8 +259,6 @@ function createMobiusStrip() {
     objects.push(mobiusStrip); // Assuming objects is an array to hold your meshes
 
 
-
-
     for(let i = 0; i<=1; i+=0.125){
         const u = 0 + i; // Adjust as needed within the range [0, 1]
         const t = 0.2 + i; // Adjust as needed within the range [0, 1]
@@ -429,7 +427,7 @@ function createCameras(){
     cameraTop.lookAt(0, 9, 15);
     
     var aspectRatio = window.innerWidth / window.innerHeight;
-    var width = 200; // Adjust as needed based on your scene size
+    var width = 150; // Adjust as needed based on your scene size
     var height = width / aspectRatio;
     cameraFront = new THREE.OrthographicCamera(
         width / -2,   // Left
@@ -439,7 +437,7 @@ function createCameras(){
         0.1,          // Near plane
         1000          // Far plane
     );
-    cameraFront.position.set(45, 6, 0); 
+    cameraFront.position.set(45, 8, 0); 
     cameraFront.lookAt(0, 4 ,15);
 }
 
@@ -627,10 +625,10 @@ function createScene() {
     directionalLight.shadow.mapSize.height = 1024;
     directionalLight.shadow.camera.near = 0.5;
     directionalLight.shadow.camera.far = 50;
-    directionalLight.shadow.camera.left = -20;
-    directionalLight.shadow.camera.right = 20;
-    directionalLight.shadow.camera.top = 20;
-    directionalLight.shadow.camera.bottom = -20;
+    directionalLight.shadow.camera.left = -25;
+    directionalLight.shadow.camera.right = 25;
+    directionalLight.shadow.camera.top = 25;
+    directionalLight.shadow.camera.bottom = -25;
 
     scene.add(directionalLight);
 
@@ -692,7 +690,7 @@ function createScene() {
     // Optional: Add a helper to visualize the axes
     scene.add(new THREE.AxesHelper(10));
     toggleSpotlightHelpersVisibility(false);
-    allElements.add(all_objects, level_1_lights, level_2_lights, level_3_lights);
+    allElements.add(mobius_lights, directionalLight, all_objects);
     allElements.position.set(0, 9, 15);
     scene.add(allElements);
 }
