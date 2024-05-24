@@ -425,11 +425,11 @@ function createRingFigures(radius, height, level, level_lights) {
 
 function createCameras(){
     cameraTop = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    cameraTop.position.set(0, 20, 0);
-    cameraTop.lookAt(0, 0, 0);
+    cameraTop.position.set(0, 29, 15);
+    cameraTop.lookAt(0, 9, 15);
     
     var aspectRatio = window.innerWidth / window.innerHeight;
-    var width = 45; // Adjust as needed based on your scene size
+    var width = 200; // Adjust as needed based on your scene size
     var height = width / aspectRatio;
     cameraFront = new THREE.OrthographicCamera(
         width / -2,   // Left
@@ -439,8 +439,8 @@ function createCameras(){
         0.1,          // Near plane
         1000          // Far plane
     );
-    cameraFront.position.set(15, -3, -15); 
-    cameraFront.lookAt(0, -5 ,0);
+    cameraFront.position.set(45, 6, 0); 
+    cameraFront.lookAt(0, 4 ,15);
 }
 
 function render(){
@@ -573,13 +573,13 @@ function onkeyup(e) {
 
 // Função para criar o skydome com textura
 function createSkydome(texture, material) {
-    var geometry = new THREE.SphereGeometry(90, 32, 32,0,Math.PI * 2,0,Math.PI/2);
+    var geometry = new THREE.SphereGeometry(50, 32, 32,0,Math.PI * 2,0,Math.PI/2);
 
     material.map = texture
 
     skydome = new THREE.Mesh(geometry, material);
 
-    skydome.position.set(0,-20,0)
+    skydome.position.set(0,-11,15)
 
     scene.add(skydome);
 }
@@ -608,6 +608,7 @@ function loadTextureAndCreateSkydome(material) {
 
 function createScene() {
     scene = new THREE.Scene();
+    var allElements = new THREE.Group()
 
     // Load the skydome texture
     loadTextureAndCreateSkydome(skydome_materials["Basic"]);
@@ -690,6 +691,10 @@ function createScene() {
 
     // Optional: Add a helper to visualize the axes
     scene.add(new THREE.AxesHelper(10));
+    toggleSpotlightHelpersVisibility(false);
+    allElements.add(all_objects, level_1_lights, level_2_lights, level_3_lights);
+    allElements.position.set(0, 9, 15);
+    scene.add(allElements);
 }
 
 function onResize() {
