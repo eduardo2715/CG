@@ -863,8 +863,8 @@ function animate() {
     
 
     render()
-    requestAnimationFrame(animate);
+    //requestAnimationFrame(animate);
 }
 
 init();
-animate();
+renderer?.setAnimationLoop(animate);
